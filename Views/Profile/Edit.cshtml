@@ -1,0 +1,35 @@
+﻿@model WebApplicationRestaurant.ViewModels.EditUserViewModel
+@{
+    ViewBag.Title = "Редактирование пользователя";
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" asp-controller="Users">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <input type="hidden" asp-for="Id" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label">Email</label>
+                <input type="text" asp-for="Email" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label">Имя</label>
+                <input type="number" asp-for="Name" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Surname" class="control-label">Фамилия</label>
+                <input type="number" asp-for="Surname" class="form-control" />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Сохранить" class="btn btn-outline-secondary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a class="btn btn-sm btn-primary" asp-action="ChangePassword" asp-route-id="@Model.Id">Сменить пароль</a>
+    <a class="btn btn-sm btn-secondary" asp-action="Index">Вернуться к списку</a>
+</div>
