@@ -1,48 +1,48 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
 
-namespace WebApplicationRestaurant.Controllers
+namespace WebApplicationRestaurant.Areas.Administration.Controllers
 {
-    public class StockController : Controller
+    [Area("Administration")]
+    public class DishUnitsController : Controller
     {
         private readonly ApplicationContext _context;
 
-        public StockController(ApplicationContext context)
+        public DishUnitsController(ApplicationContext context)
         {
             _context = context;
         }
 
-        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Ingredients.ToListAsync());
+            return View(await _context.DishUnits.ToListAsync());
         }
 
-        [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Count,DeliveryDate")] Ingredient ingredient)
+        public async Task<IActionResult> Create([Bind("Id,Name")] DishUnit dishUnit)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(ingredient);
+                _context.Add(dishUnit);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(ingredient);
+            return View(dishUnit);
         }
 
-        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -50,34 +50,28 @@ namespace WebApplicationRestaurant.Controllers
                 return NotFound();
             }
 
-            var ingredient = await _context.Ingredients.FindAsync(id);
-            if (ingredient == null)
+            var dishUnit = await _context.DishUnits.FindAsync(id);
+            if (dishUnit == null)
             {
                 return NotFound();
             }
-            return View(ingredient);
+            return View(dishUnit);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Count,DeliveryDate")] Ingredient ingredient)
+        public async Task<IActionResult> Edit([Bind("Id,Name")] DishUnit dishUnit)
         {
-            if (id != ingredient.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(ingredient);
+                    _context.Update(dishUnit);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!IngredientExists(ingredient.Id))
+                    if (!DishUnitExists(dishUnit.Id))
                     {
                         return NotFound();
                     }
@@ -88,10 +82,9 @@ namespace WebApplicationRestaurant.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(ingredient);
+            return View(dishUnit);
         }
 
-        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -99,30 +92,29 @@ namespace WebApplicationRestaurant.Controllers
                 return NotFound();
             }
 
-            var ingredient = await _context.Ingredients
+            var dishUnit = await _context.DishUnits
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (ingredient == null)
+            if (dishUnit == null)
             {
                 return NotFound();
             }
 
-            return View(ingredient);
+            return View(dishUnit);
         }
-
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var ingredient = await _context.Ingredients.FindAsync(id);
-            _context.Ingredients.Remove(ingredient);
+            var dishUnit = await _context.DishUnits.FindAsync(id);
+            _context.DishUnits.Remove(dishUnit);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool IngredientExists(int id)
+        private bool DishUnitExists(int id)
         {
-            return _context.Ingredients.Any(e => e.Id == id);
+            return _context.DishUnits.Any(e => e.Id == id);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿@model WebApplicationRestaurant.Areas.Administration.ViewModels.EditUserViewModel
 @{
-    ViewBag.Title = "Редактирование пользователя";
+    ViewBag.Title = "Зміна користувача";
 }
 
 <div class="row">
@@ -15,20 +15,20 @@
                 <input type="text" asp-for="Email" class="form-control" />
             </div>
             <div class="form-group">
-                <label asp-for="Name" class="control-label">Имя</label>
+                <label asp-for="Name" class="control-label">Ім'я</label>
                 <input type="number" asp-for="Name" class="form-control" />
             </div>
             <div class="form-group">
-                <label asp-for="Surname" class="control-label">Фамилия</label>
+                <label asp-for="Surname" class="control-label">Прізвище</label>
                 <input type="number" asp-for="Surname" class="form-control" />
             </div>
             <div class="form-group">
-                <input type="submit" value="Сохранить" class="btn btn-outline-secondary" />
+                <input type="submit" value="Зберегти" class="btn btn-outline-secondary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Вернуться к списку</a>
+    <a asp-action="Index">Повернутися до списку</a>
 </div>
