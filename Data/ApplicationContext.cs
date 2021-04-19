@@ -28,14 +28,6 @@ namespace WebApplicationRestaurant.Data
         public DbSet<Place> Places { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
 
-        public Controllers.ProfileController ProfileController
-        {
-            get => default;
-            set
-            {
-            }
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

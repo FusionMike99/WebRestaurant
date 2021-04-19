@@ -1,0 +1,42 @@
+﻿@model WebApplicationRestaurant.Models.Ingredient
+
+@{
+    ViewData["Title"] = "Подробиці";
+}
+
+<h1>Подробиці</h1>
+
+<div>
+    <h4>Інгредієнт</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Count)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Count)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IngredientUnit)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.IngredientUnit.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DeliveryDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DeliveryDate)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Змінити</a> |
+    <a asp-action="Index">Повернутися до списку</a>
+</div>
