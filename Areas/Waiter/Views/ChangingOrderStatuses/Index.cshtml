@@ -1,0 +1,55 @@
+﻿@model IEnumerable<WebApplicationRestaurant.Models.Order>
+
+@{
+    ViewData["Title"] = "Список";
+}
+
+<h1>Список</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreateTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Amount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Place)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreateTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Amount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Place.Number)
+            </td>
+            <td>
+                <a asp-action="CloseOrder" asp-route-id="@item.Id">Закрити замовлення</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Подробиці</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
