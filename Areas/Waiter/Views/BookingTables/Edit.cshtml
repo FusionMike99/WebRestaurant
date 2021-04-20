@@ -1,0 +1,49 @@
+﻿@model WebApplicationRestaurant.Models.Place
+
+@{
+    ViewData["Title"] = "Змінити";
+}
+
+<h1>Змінити</h1>
+
+<h4>Столик</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="Number" class="control-label"></label>
+                <input asp-for="Number" class="form-control" />
+                <span asp-validation-for="Number" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Available" /> @Html.DisplayNameFor(model => model.Available)
+                </label>
+            </div>
+            <div class="form-group">
+                <label asp-for="ReserverName" class="control-label"></label>
+                <input asp-for="ReserverName" class="form-control" />
+                <span asp-validation-for="ReserverName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ReserveTime" class="control-label"></label>
+                <input asp-for="ReserveTime" class="form-control" />
+                <span asp-validation-for="ReserveTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Зберегти" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Повернутися до списку</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

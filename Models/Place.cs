@@ -9,6 +9,8 @@ namespace WebApplicationRestaurant.Models
     public class Place
     {
         public int Id { get; set; }
+        [Display(Name = "Номер столику")]
+        public int Number { get; set; }
         [Display(Name = "Доступність")]
         public bool Available { get; set; }
         [Display(Name = "Ім'я того, хто забронював")]

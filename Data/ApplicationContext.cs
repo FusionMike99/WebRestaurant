@@ -362,6 +362,9 @@ namespace WebApplicationRestaurant.Data
             {
                 entity.ToTable("Place");
 
+                entity.Property(e => e.Number)
+                    .HasColumnName("number");
+
                 entity.Property(e => e.Available)
                     .HasColumnName("available")
                     .HasDefaultValue(1);
