@@ -1,0 +1,57 @@
+﻿@model WebApplicationRestaurant.Models.Order
+
+@{
+    ViewData["Title"] = "Оформлення замовлення";
+}
+
+<h1>Оформлення</h1>
+
+<h4>Замовлення</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="PlaceId" class="control-label"></label>
+                <select asp-for="PlaceId" class="form-control" asp-items="ViewBag.PlaceId"></select>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.Label("Dish", "Страва")
+                        </th>
+                        <th>
+                            @Html.Label("Count", "Кількість")
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.ShoppingCart)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Dish.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Count)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="form-group">
+                <input type="submit" value="Оформити" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Повернутися до списку</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

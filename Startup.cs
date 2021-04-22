@@ -31,6 +31,9 @@ namespace WebApplicationRestaurant
             }).AddEntityFrameworkStores<ApplicationContext>();
 
             services.AddMvc();
+
+            services.AddDistributedMemoryCache();
+            services.AddSession();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -51,6 +54,8 @@ namespace WebApplicationRestaurant
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {

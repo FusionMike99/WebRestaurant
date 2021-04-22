@@ -15,7 +15,7 @@ namespace WebApplicationRestaurant.Models
         public Order Order { get; set; }
 
         [Display(Name = "Кількість")]
-        public int Count { get; set; }
+        public int Count { get; set; } = 1;
         public int DishStatusId { get; set; }
         public string UserId { get; set; }
 

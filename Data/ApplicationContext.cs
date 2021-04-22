@@ -420,5 +420,7 @@ namespace WebApplicationRestaurant.Data
                     .IsFixedLength(true);
             });
         }
+
+        public DbSet<WebApplicationRestaurant.Models.ShoppingCartItem> ShoppingCartItem { get; set; }
     }
 }
