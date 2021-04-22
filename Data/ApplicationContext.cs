@@ -422,5 +422,7 @@ namespace WebApplicationRestaurant.Data
         }
 
         public DbSet<WebApplicationRestaurant.Models.ShoppingCartItem> ShoppingCartItem { get; set; }
+
+        public DbSet<WebApplicationRestaurant.Models.OrderIngredientsItem> OrderIngredientsItem { get; set; }
     }
 }

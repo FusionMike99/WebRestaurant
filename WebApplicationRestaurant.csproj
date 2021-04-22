@@ -25,6 +25,7 @@
   <ItemGroup>
     <Folder Include="Areas\Administration\Data\" />
     <Folder Include="Areas\Administration\Models\" />
+    <Folder Include="Areas\Cooker\Models\" />
     <Folder Include="Areas\Waiter\Models\" />
   </ItemGroup>
 

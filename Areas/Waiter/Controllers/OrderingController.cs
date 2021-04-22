@@ -23,7 +23,8 @@ namespace WebApplicationRestaurant.Areas.Waiter.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Dishes.ToListAsync());
+            var applicationContext = _context.Dishes.Include(d => d.Category).Include(d => d.DishUnit);
+            return View(await applicationContext.ToListAsync());
         }
 
         public IActionResult GoToCart()

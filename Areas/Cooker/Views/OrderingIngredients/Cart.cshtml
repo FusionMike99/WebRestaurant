@@ -1,0 +1,43 @@
+﻿@model IEnumerable<WebApplicationRestaurant.Models.OrderIngredientsItem>
+
+@{
+    ViewData["Title"] = "Кошик";
+}
+
+<h1>Кошик</h1>
+
+<p>
+    <a asp-action="GoToOrder">Оформити замовлення</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Ingredient)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Count)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Ingredient.Name)
+                </td>
+                <td>
+                    @Html.EditorFor(modelItem => item.Count)
+                </td>
+                <td>
+                    <a asp-action="DeleteFromCart" asp-route-model="@item">Видалити з кошику</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<p>
+    <a asp-action="ClearCart">Очистити кошик</a>
+</p>

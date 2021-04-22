@@ -13,6 +13,6 @@ namespace WebApplicationRestaurant.Models
         public OrderIngredients OrderIngredients { get; set; }
 
         [Display(Name = "Кількість")]
-        public int Count { get; set; }
+        public double Count { get; set; } = 1;
     }
 }

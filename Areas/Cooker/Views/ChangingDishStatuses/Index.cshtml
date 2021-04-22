@@ -1,0 +1,56 @@
+﻿@model IEnumerable<WebApplicationRestaurant.Models.ShoppingCartItem>
+
+@{
+    ViewData["Title"] = "Список";
+}
+
+<h1>Список</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Order)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Dish)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Count)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DishStatus)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Order.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Dish.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Count)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DishStatus.Name)
+            </td>
+            <td>
+                @if (item.DishStatusId.Equals(1))
+                {
+                <a asp-action="DeleteFromCart" asp-route-idOrder="@item.OrderId" asp-route-idDish="@item.DishId"
+                   asp-route-idStatus="2">Прийняти блюдо</a>
+                }
+                else if (item.DishStatusId.Equals(2))
+                {
+                <a asp-action="DeleteFromCart" asp-route-idOrder="@item.OrderId" asp-route-idDish="@item.DishId"
+                   asp-route-idStatus="3">Блюдо приготовлене</a>
+                }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
