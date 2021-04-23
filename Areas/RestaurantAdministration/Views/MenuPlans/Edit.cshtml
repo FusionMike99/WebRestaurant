@@ -1,0 +1,43 @@
+﻿@model WebApplicationRestaurant.Models.MenuPlan
+
+@{
+    ViewData["Title"] = "Змінити";
+}
+
+<h1>Змінити</h1>
+
+<h4>План меню</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="PlanStartDate" class="control-label"></label>
+                <input asp-for="PlanStartDate" class="form-control" />
+                <span asp-validation-for="PlanStartDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PlanEndDate" class="control-label"></label>
+                <input asp-for="PlanEndDate" class="form-control" />
+                <span asp-validation-for="PlanEndDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Dishes" class="control-label"></label>
+                <select asp-for="Dishes" multiple="multiple" class="form-control" asp-items="ViewBag.Dishes"></select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Зберегти" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Повернутися до списку</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

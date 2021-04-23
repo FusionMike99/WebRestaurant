@@ -1,0 +1,41 @@
+﻿@model WebApplicationRestaurant.Models.MenuPlan
+
+@{
+    ViewData["Title"] = "Подробиці";
+}
+
+<h1>Подробиці</h1>
+
+<div>
+    <h4>План меню</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PlanStartDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PlanStartDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PlanEndDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PlanEndDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Dishes)
+        </dt>
+        <dd class="col-sm-10">
+            <ul>
+                @foreach (var item in Model.Dishes)
+                {
+                    <li>@Html.DisplayFor(modelItem => item.Name)</li>
+                }
+            </ul>
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Змінити</a> |
+    <a asp-action="Index">Повернутися до списку</a>
+</div>
