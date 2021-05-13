@@ -419,10 +419,54 @@ namespace WebApplicationRestaurant.Data
                     .HasColumnName("Surname")
                     .IsFixedLength(true);
             });
+
+            modelBuilder.Entity<Category>().HasData(
+            new Category[]
+            {
+                new Category { Id=1, Name="First meals"},
+                new Category { Id=2, Name="Second meals"},
+                new Category { Id=3, Name="Salads"},
+                new Category { Id=4, Name="Pizzas"},
+                new Category { Id=5, Name="Drinks"}
+            });
+
+            modelBuilder.Entity<DishStatus>().HasData(
+            new DishStatus[]
+            {
+                new DishStatus { Id=1, Name="awaiting"},
+                new DishStatus { Id=2, Name="accepted"},
+                new DishStatus { Id=3, Name="ready"}
+            });
+
+            modelBuilder.Entity<DishUnit>().HasData(
+            new DishUnit[]
+            {
+                new DishUnit { Id=1, Name="грам"},
+                new DishUnit { Id=2, Name="кілограм"},
+                new DishUnit { Id=3, Name="літр"}
+            });
+
+            modelBuilder.Entity<IngredientUnit>().HasData(
+            new IngredientUnit[]
+            {
+                new IngredientUnit { Id=1, Name="грам"},
+                new IngredientUnit { Id=2, Name="кілограм"},
+                new IngredientUnit { Id=3, Name="літр"}
+            });
+
+            modelBuilder.Entity<OrderIngredientsStatus>().HasData(
+            new OrderIngredientsStatus[]
+            {
+                new OrderIngredientsStatus { Id=1, Name="open"},
+                new OrderIngredientsStatus { Id=2, Name="close"}
+            });
+
+            modelBuilder.Entity<OrderStatus>().HasData(
+            new OrderStatus[]
+            {
+                new OrderStatus { Id=1, Name="open"},
+                new OrderStatus { Id=2, Name="close"}
+            });
         }
-
-        public DbSet<WebApplicationRestaurant.Models.ShoppingCartItem> ShoppingCartItem { get; set; }
-
-        public DbSet<WebApplicationRestaurant.Models.OrderIngredientsItem> OrderIngredientsItem { get; set; }
     }
 }
