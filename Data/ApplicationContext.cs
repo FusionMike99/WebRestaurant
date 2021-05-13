@@ -23,10 +23,12 @@ namespace WebApplicationRestaurant.Data
         public DbSet<MenuPlan> MenuPlans { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderIngredients> OrderIngredients { get; set; }
+        public DbSet<OrderIngredientsItem> OrderIngredientsItem { get; set; }
         public DbSet<OrderIngredientsStatus> OrderIngredientsStatuses { get; set; }
         public DbSet<OrderStatus> OrderStatuses { get; set; }
         public DbSet<Place> Places { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
+        public DbSet<ShoppingCartItem> ShoppingCartItem { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
