@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using WebApplicationRestaurant.Models;
+using WebApplicationRestaurant.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,8 @@ namespace WebApplicationRestaurant
                 var services = scope.ServiceProvider;
                 try
                 {
+                    var context = services.GetRequiredService<ApplicationContext>();
+                    SampleData.Initialize(context);
                     var userManager = services.GetRequiredService<UserManager<User>>();
                     var rolesManager = services.GetRequiredService<RoleManager<IdentityRole>>();
                     await UserRoleInitializer.InitializeAsync(userManager, rolesManager);
