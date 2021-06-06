@@ -5,16 +5,15 @@ namespace WebApplicationRestaurant.ViewModels
     public class LoginViewModel
     {
         [Required]
-        [EmailAddress(ErrorMessage = "Некорректный адрес")]
-        [Display(Name = "Email")]
-        public string Email { get; set; }
+        [Display(Name = "Логін")]
+        public string UserName { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
         [Display(Name = "Пароль")]
         public string Password { get; set; }
 
-        [Display(Name = "Запомнить?")]
+        [Display(Name = "Запам'ятати?")]
         public bool RememberMe { get; set; }
 
         public string ReturnUrl { get; set; }
