@@ -46,7 +46,12 @@
                 @Html.DisplayFor(modelItem => item.Place.Number)
             </td>
             <td>
-                <a asp-action="CloseOrder" asp-route-id="@item.Id">Закрити замовлення</a> |
+                @if (item.StatusId.Equals(1)) 
+                {
+                    <div>
+                        <a asp-action="CloseOrder" asp-route-id="@item.Id">Закрити замовлення</a> |
+                    </div>
+                }
                 <a asp-action="Details" asp-route-id="@item.Id">Подробиці</a>
             </td>
         </tr>

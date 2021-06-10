@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using WebApplicationRestaurant.Models;
 namespace WebApplicationRestaurant.Areas.Waiter.Controllers
 {
     [Area("Waiter")]
+    [Authorize(Roles = "waiter")]
     public class BookingTablesController : Controller
     {
         private readonly ApplicationContext _context;
@@ -77,7 +79,7 @@ namespace WebApplicationRestaurant.Areas.Waiter.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([Bind("Id,Number")] Place place)
+        public async Task<IActionResult> Edit([Bind("Id,Number,Available")] Place place)
         {
             if (ModelState.IsValid)
             {
@@ -119,7 +121,7 @@ namespace WebApplicationRestaurant.Areas.Waiter.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BookTable([Bind("Id,ReserverName,ReserveTime")] Place place)
+        public async Task<IActionResult> BookTable([Bind("Id,Number,ReserverName,ReserveTime")] Place place)
         {
             if (ModelState.IsValid)
             {
@@ -154,6 +156,8 @@ namespace WebApplicationRestaurant.Areas.Waiter.Controllers
 
             var place = await _context.Places.FindAsync(id);
             place.Available = true;
+            place.ReserverName = null;
+            place.ReserveTime = null;
 
             if (ModelState.IsValid)
             {

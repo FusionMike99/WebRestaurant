@@ -13,6 +13,7 @@
         <form asp-action="BookTable">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Number" />
             <div class="form-group">
                 <label asp-for="ReserverName" class="control-label"></label>
                 <input asp-for="ReserverName" class="form-control" />

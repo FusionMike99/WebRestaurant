@@ -21,8 +21,11 @@ namespace WebApplicationRestaurant
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("SqlServerDevelopmentConnection")));
+            services.AddDbContext<ApplicationContext>(options => 
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("SqlServerDevelopmentConnection"));
+                options.LogTo(message => System.Diagnostics.Debug.WriteLine(message));
+            });
 
             services.AddIdentity<User, IdentityRole>(options =>
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using WebApplicationRestaurant.Models;
 namespace WebApplicationRestaurant.Areas.Waiter.Controllers
 {
     [Area("Waiter")]
+    [Authorize(Roles = "waiter")]
     public class OrderingController : Controller
     {
         private readonly ApplicationContext _context;
@@ -32,33 +34,63 @@ namespace WebApplicationRestaurant.Areas.Waiter.Controllers
             return View("Cart", HttpContext.Session.Get<List<ShoppingCartItem>>("shoppingCart"));
         }
 
-        public IActionResult AddToCart(Dish model)
+        public async Task<IActionResult> AddToCart(int? id)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
-                List<ShoppingCartItem> shoppingCart;
-                if (HttpContext.Session.Keys.Contains("shoppingCart"))
+                var shoppingCart = HttpContext.Session.Get<List<ShoppingCartItem>>("shoppingCart") ?? new List<ShoppingCartItem>();
+                var shoppingCartItem = shoppingCart.FirstOrDefault(sc => sc.DishId == id);
+                if(shoppingCartItem == null)
                 {
-                    shoppingCart = HttpContext.Session.Get<List<ShoppingCartItem>>("shoppingCart");
+                    shoppingCart.Add(new ShoppingCartItem
+                    {
+                        Dish = await _context.Dishes.FindAsync(id),
+                        DishId = (int)id
+                    });
                 }
                 else
                 {
-                    shoppingCart = new List<ShoppingCartItem>();
+                    shoppingCartItem.Count++;
                 }
-                var shoppingCartItem = new ShoppingCartItem();
-                shoppingCartItem.Dish = model;
-                shoppingCart.Add(shoppingCartItem);
                 HttpContext.Session.Set("shoppingCart", shoppingCart);
             }
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult DeleteFromCart(ShoppingCartItem model)
+        public IActionResult ChangeCart(int? id, int count)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
                 var shoppingCart = HttpContext.Session.Get<List<ShoppingCartItem>>("shoppingCart");
-                shoppingCart.Remove(model);
+                var shoppingCartItem = shoppingCart.FirstOrDefault(sc => sc.DishId == id);
+                if(shoppingCartItem != null)
+                    shoppingCartItem.Count += count;
+                HttpContext.Session.Set("shoppingCart", shoppingCart);
+            }
+            return RedirectToAction(nameof(GoToCart));
+        }
+
+        public IActionResult DeleteFromCart(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                var shoppingCart = HttpContext.Session.Get<List<ShoppingCartItem>>("shoppingCart");
+                shoppingCart.RemoveAll(sc => sc.DishId == id);
                 HttpContext.Session.Set("shoppingCart", shoppingCart);
             }
             return RedirectToAction(nameof(GoToCart));
@@ -88,6 +120,8 @@ namespace WebApplicationRestaurant.Areas.Waiter.Controllers
         public async Task<IActionResult> Create(Order order)
         {
             order.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            order.ShoppingCart = HttpContext.Session.Get<List<ShoppingCartItem>>("shoppingCart");
+            order.ShoppingCart.ForEach(sc => sc.Dish = null);
             if (ModelState.IsValid)
             {
                 _context.Add(order);

@@ -18,21 +18,7 @@
                 <input asp-for="Number" class="form-control" />
                 <span asp-validation-for="Number" class="text-danger"></span>
             </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Available" /> @Html.DisplayNameFor(model => model.Available)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="ReserverName" class="control-label"></label>
-                <input asp-for="ReserverName" class="form-control" />
-                <span asp-validation-for="ReserverName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ReserveTime" class="control-label"></label>
-                <input asp-for="ReserveTime" class="form-control" />
-                <span asp-validation-for="ReserveTime" class="text-danger"></span>
-            </div>
+            <input type="hidden" asp-for="Available" />
             <div class="form-group">
                 <input type="submit" value="Зберегти" class="btn btn-primary" />
             </div>
