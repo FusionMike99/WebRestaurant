@@ -1,0 +1,26 @@
+﻿@model WebApplicationRestaurant.Areas.Administration.ViewModels.DishRecipeViewModel
+
+@{
+    ViewBag.Title = "Зміна ролей для користувача";
+}
+
+<h2>Зміна рецепту для страви </h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditRecipe" method="post">
+            <input type="hidden" name="dishId" value="@Model.DishId" />
+            <div class="form-group">
+                @foreach (var ingredient in Model.Ingredients)
+                {
+                    <input type="checkbox" name="ingredientsId" value="@ingredient.Id"
+                           @(Model.Recipe.Contains(ingredient.Id) ? "checked=\"checked\"" : "") />@ingredient.Name <br />
+                    }
+            </div>
+            <button type="submit" class="btn btn-primary">Зберегти</button>
+        </form>
+    </div>
+</div>
+<div>
+    <a asp-action="Index">Повернутися до списку</a>
+</div>

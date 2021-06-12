@@ -29,15 +29,18 @@
                     @Html.DisplayFor(modelItem => item.Ingredient.Name)
                 </td>
                 <td>
-                    @Html.EditorFor(modelItem => item.Count)
+                    @Html.DisplayFor(modelItem => item.Count)
                 </td>
                 <td>
-                    <a asp-action="DeleteFromCart" asp-route-model="@item">Видалити з кошику</a>
+                    <a asp-action="ChangeCart" asp-route-id="@item.IngredientId" asp-route-count="1">Збільшити</a> |
+                    <a asp-action="ChangeCart" asp-route-id="@item.IngredientId" asp-route-count="-1">Зменьшити</a> |
+                    <a asp-action="DeleteFromCart" asp-route-id="@item.IngredientId">Видалити з кошику</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
 <p>
-    <a asp-action="ClearCart">Очистити кошик</a>
+    <a asp-action="ClearCart">Очистити кошик</a> |
+    <a asp-action="Index">Повернутися до списку</a>
 </p>

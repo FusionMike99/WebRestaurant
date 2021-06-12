@@ -41,12 +41,12 @@
             <td>
                 @if (item.DishStatusId.Equals(1))
                 {
-                <a asp-action="DeleteFromCart" asp-route-idOrder="@item.OrderId" asp-route-idDish="@item.DishId"
+                <a asp-action="ChangeStatus" asp-route-idOrder="@item.OrderId" asp-route-idDish="@item.DishId"
                    asp-route-idStatus="2">Прийняти блюдо</a>
                 }
                 else if (item.DishStatusId.Equals(2))
                 {
-                <a asp-action="DeleteFromCart" asp-route-idOrder="@item.OrderId" asp-route-idDish="@item.DishId"
+                <a asp-action="ChangeStatus" asp-route-idOrder="@item.OrderId" asp-route-idDish="@item.DishId"
                    asp-route-idStatus="3">Блюдо приготовлене</a>
                 }
             </td>

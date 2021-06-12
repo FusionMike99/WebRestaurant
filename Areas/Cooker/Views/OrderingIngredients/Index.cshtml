@@ -32,7 +32,7 @@
                     @Html.DisplayFor(modelItem => item.DeliveryDate)
                 </td>
                 <td>
-                    <a asp-action="AddToCart" asp-route-model="@item">Додати до кошику</a>
+                    <a asp-action="AddToCart" asp-route-id="@item.Id">Додати до кошику</a>
                 </td>
             </tr>
         }

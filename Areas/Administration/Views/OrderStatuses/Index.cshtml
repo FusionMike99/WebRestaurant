@@ -31,8 +31,8 @@
                 @Html.DisplayFor(modelItem => item.Count)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Змінити</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Видалити</a>
+                <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@item.Id">Змінити</a> 
+                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.Id">Видалити</a>
             </td>
         </tr>
 }

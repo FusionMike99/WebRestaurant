@@ -31,7 +31,11 @@ namespace WebApplicationRestaurant.Areas.Waiter.Controllers
 
         public IActionResult GoToCart()
         {
-            return View("Cart", HttpContext.Session.Get<List<ShoppingCartItem>>("shoppingCart"));
+            var shoppingCart = HttpContext.Session.Get<List<ShoppingCartItem>>("shoppingCart");
+            if(shoppingCart == null)
+                return RedirectToAction(nameof(Index));
+            else
+                return View("Cart", shoppingCart);
         }
 
         public async Task<IActionResult> AddToCart(int? id)

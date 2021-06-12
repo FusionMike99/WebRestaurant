@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using WebApplicationRestaurant.Models;
 namespace WebApplicationRestaurant.Areas.Cooker.Controllers
 {
     [Area("Cooker")]
+    [Authorize(Roles = "cooker")]
     public class ChangingDishStatusesController : Controller
     {
         private readonly ApplicationContext _context;
@@ -22,7 +24,9 @@ namespace WebApplicationRestaurant.Areas.Cooker.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.ShoppingCartItem.Where(sci => !sci.DishStatusId.Equals(3)).ToListAsync());
+            return View(await _context.ShoppingCartItem.Where(sci => !sci.DishStatusId.Equals(3))
+                .Include(sc => sc.Order).Include(sc => sc.Dish)
+                .Include(sc => sc.DishStatus).ToListAsync());
         }
 
         public async Task<IActionResult> ChangeStatus(int? idOrder, int? idDish, int idStatus)

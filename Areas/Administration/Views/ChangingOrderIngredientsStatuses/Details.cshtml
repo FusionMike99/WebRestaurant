@@ -1,0 +1,59 @@
+﻿@model WebApplicationRestaurant.Models.OrderIngredients
+
+@{
+    ViewData["Title"] = "Подробиці";
+}
+
+<h1>Подробиці</h1>
+
+<div>
+    <h4>Замовлення інгредієнтів</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.CreateDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CreateDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.OrderDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.OrderDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Status.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.User)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.User.Name) @Html.DisplayFor(model => model.User.Surname)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.OrderIngredientsItems)
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var item in Model.OrderIngredientsItems)
+            {
+                <div>
+                    @Html.DisplayFor(modelItem => item.Ingredient.Name) :
+                    @Html.DisplayFor(modelItem => item.Count)
+                </div>
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    @if (Model.StatusId.Equals(1))
+    {
+        <div>
+            <a asp-action="CloseOrder" asp-route-id="@Model.Id">Закрити замовлення</a> |
+        </div>
+    }
+    <a asp-action="Index">Повернутися до списку</a>
+</div>

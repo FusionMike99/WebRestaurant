@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using WebApplicationRestaurant.Models;
 namespace WebApplicationRestaurant.Areas.Cooker.Controllers
 {
     [Area("Cooker")]
+    [Authorize(Roles = "cooker")]
     public class OrderingIngredientsController : Controller
     {
         private readonly ApplicationContext _context;
@@ -29,36 +31,72 @@ namespace WebApplicationRestaurant.Areas.Cooker.Controllers
 
         public IActionResult GoToCart()
         {
-            return View("Cart", HttpContext.Session.Get<List<OrderIngredientsItem>>("ingredientsCart"));
+            var ingredientsCart = HttpContext.Session.Get<List<OrderIngredientsItem>>("ingredientsCart");
+            if (ingredientsCart == null)
+                return RedirectToAction(nameof(Index));
+            else
+                return View("Cart", ingredientsCart);
         }
 
-        public IActionResult AddToCart(Ingredient model)
+        public async Task<IActionResult> AddToCart(int? id)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
-                List<OrderIngredientsItem> ingredientsCart;
-                if (HttpContext.Session.Keys.Contains("ingredientsCart"))
+                List<OrderIngredientsItem> ingredientsCart = HttpContext.Session.Get<List<OrderIngredientsItem>>("ingredientsCart") 
+                    ?? new List<OrderIngredientsItem>();
+                var ingredientsCartItem = ingredientsCart.FirstOrDefault(ic => ic.IngredientId == id);
+                if (ingredientsCartItem == null)
                 {
-                    ingredientsCart = HttpContext.Session.Get<List<OrderIngredientsItem>>("ingredientsCart");
+                    ingredientsCart.Add(new OrderIngredientsItem
+                    {
+                        Ingredient = await _context.Ingredients.FindAsync(id),
+                        IngredientId = (int)id
+                    });
                 }
                 else
                 {
-                    ingredientsCart = new List<OrderIngredientsItem>();
+                    ingredientsCartItem.Count++;
                 }
-                var ingredientsCartItem = new OrderIngredientsItem();
-                ingredientsCartItem.Ingredient = model;
-                ingredientsCart.Add(ingredientsCartItem);
                 HttpContext.Session.Set("ingredientsCart", ingredientsCart);
             }
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult DeleteFromCart(OrderIngredientsItem model)
+
+        public IActionResult ChangeCart(int? id, int count)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
                 var ingredientsCart = HttpContext.Session.Get<List<OrderIngredientsItem>>("ingredientsCart");
-                ingredientsCart.Remove(model);
+                var ingredientsCartItem = ingredientsCart.FirstOrDefault(ic => ic.IngredientId == id);
+                if (ingredientsCartItem != null)
+                    ingredientsCartItem.Count += count;
+                HttpContext.Session.Set("ingredientsCart", ingredientsCart);
+            }
+            return RedirectToAction(nameof(GoToCart));
+        }
+
+        public IActionResult DeleteFromCart(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                var ingredientsCart = HttpContext.Session.Get<List<OrderIngredientsItem>>("ingredientsCart");
+                ingredientsCart.RemoveAll(ic => ic.IngredientId == id);
                 HttpContext.Session.Set("ingredientsCart", ingredientsCart);
             }
             return RedirectToAction(nameof(GoToCart));
@@ -87,6 +125,8 @@ namespace WebApplicationRestaurant.Areas.Cooker.Controllers
         public async Task<IActionResult> Create(OrderIngredients order)
         {
             order.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            order.OrderIngredientsItems = HttpContext.Session.Get<List<OrderIngredientsItem>>("ingredientsCart");
+            order.OrderIngredientsItems.ForEach(ic => ic.Ingredient = null);
             if (ModelState.IsValid)
             {
                 _context.Add(order);

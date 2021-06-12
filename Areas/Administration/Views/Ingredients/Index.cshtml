@@ -31,9 +31,9 @@
                 @Html.DisplayFor(modelItem => item.DeliveryDate)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Змінити</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Подробиці</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Видалити</a>
+                <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@item.Id">Змінити</a> 
+                <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@item.Id">Подробиці</a> 
+                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.Id">Видалити</a>
             </td>
         </tr>
 }

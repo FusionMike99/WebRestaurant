@@ -1,11 +1,30 @@
 ﻿@model string
 
-<div asp-validation-summary="All" class="text-danger"></div>
+@{
+    ViewData["Title"] = "Додати";
+}
 
-<form asp-action="Create" method="post">
-    <div class="form-group">
-        <label for="name">Нова роль</label>
-        <input name="name" class="form-control" />
+<h1>Додати</h1>
+
+<h4>Роль користувача</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label for="name" class="control-label">Нова роль</label>
+                <input name="name" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Додати</button>
+        </form>
     </div>
-    <button type="submit" class="btn btn-primary">Додати</button>
-</form>
+</div>
+
+<div>
+    <a asp-action="Index">Повернутися до списку</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

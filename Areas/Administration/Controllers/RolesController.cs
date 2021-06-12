@@ -56,6 +56,7 @@ namespace WebApplicationRestaurant.Areas.Administration.Controllers
 
         public IActionResult UserList() => View(_userManager.Users.ToList());
 
+        [HttpGet]
         public async Task<IActionResult> Edit(string userId)
         {
             // получаем пользователя
@@ -98,7 +99,7 @@ namespace WebApplicationRestaurant.Areas.Administration.Controllers
 
                 await _userManager.RemoveFromRolesAsync(user, removedRoles);
 
-                return RedirectToAction("UserList");
+                return RedirectToAction("Index", "Users");
             }
 
             return NotFound();

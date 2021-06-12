@@ -14,7 +14,9 @@ namespace WebApplicationRestaurant.Models
         public double Weight { get; set; }
         [Display(Name = "Вартість")]
         public double Cost { get; set; }
+        [Display(Name = "Категорія")]
         public int CategoryId { get; set; }
+        [Display(Name = "Одиниця виміру")]
         public int DishUnitId { get; set; }
 
         [Display(Name = "Категорія")]

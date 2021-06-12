@@ -31,9 +31,9 @@
                 @Html.DisplayFor(modelItem => item.Count)
             </td>
             <td>
-                <a asp-action="ChangeCart" asp-route-id="@item.Dish.Id" asp-route-count="1">Збільшити</a> |
-                <a asp-action="ChangeCart" asp-route-id="@item.Dish.Id" asp-route-count="-1">Зменщити</a> |
-                <a asp-action="DeleteFromCart" asp-route-id="@item.Dish.Id">Видалити з кошику</a>
+                <a asp-action="ChangeCart" asp-route-id="@item.DishId" asp-route-count="1">Збільшити</a> |
+                <a asp-action="ChangeCart" asp-route-id="@item.DishId" asp-route-count="-1">Зменьшити</a> |
+                <a asp-action="DeleteFromCart" asp-route-id="@item.DishId">Видалити з кошику</a>
             </td>
         </tr>
 }
