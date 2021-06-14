@@ -42,12 +42,12 @@
                 @if (item.DishStatusId.Equals(1))
                 {
                 <a asp-action="ChangeStatus" asp-route-idOrder="@item.OrderId" asp-route-idDish="@item.DishId"
-                   asp-route-idStatus="2">Прийняти блюдо</a>
+                   asp-route-idStatus="2">Прийняти страву</a>
                 }
                 else if (item.DishStatusId.Equals(2))
                 {
                 <a asp-action="ChangeStatus" asp-route-idOrder="@item.OrderId" asp-route-idDish="@item.DishId"
-                   asp-route-idStatus="3">Блюдо приготовлене</a>
+                   asp-route-idStatus="3">Страва приготовлена</a>
                 }
             </td>
         </tr>

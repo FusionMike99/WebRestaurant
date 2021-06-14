@@ -15,8 +15,11 @@ namespace WebApplicationRestaurant.Models
         public DateTime? FinishTime { get; set; }
         [Display(Name = "Сума")]
         public double Amount { get; set; }
+        [Display(Name = "Статус")]
         public int StatusId { get; set; }
+        [Display(Name = "Столик")]
         public int PlaceId { get; set; }
+        [Display(Name = "Офіціант")]
         public string UserId { get; set; }
 
         [Display(Name = "Статус")]

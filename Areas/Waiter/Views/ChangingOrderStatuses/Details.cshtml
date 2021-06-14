@@ -65,7 +65,7 @@
     @if (Model.StatusId.Equals(1))
     {
     <div>
-        <a asp-action="CloseOrder" asp-route-id="@Model.Id">Закрити замовлення</a> |
+        <a class="btn btn-sm btn-danger" asp-action="CloseOrder" asp-route-id="@Model.Id">Закрити замовлення</a>
     </div>
     }
     <a asp-action="Index">Повернутися до списку</a>

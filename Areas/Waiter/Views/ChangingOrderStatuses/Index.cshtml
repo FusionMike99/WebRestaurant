@@ -46,13 +46,16 @@
                 @Html.DisplayFor(modelItem => item.Place.Number)
             </td>
             <td>
-                @if (item.StatusId.Equals(1)) 
+                @if (item.StatusId.Equals(1))
                 {
                     <div>
-                        <a asp-action="CloseOrder" asp-route-id="@item.Id">Закрити замовлення</a> |
+                        <a class="btn btn-sm btn-danger" asp-action="CloseOrder" asp-route-id="@item.Id">Закрити замовлення</a>
                     </div>
+                    <br />
                 }
-                <a asp-action="Details" asp-route-id="@item.Id">Подробиці</a>
+                <div>
+                    <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@item.Id">Подробиці</a>
+                </div>
             </td>
         </tr>
 }

@@ -149,7 +149,7 @@ namespace WebApplicationRestaurant.Areas.Administration.Controllers
             if (dish != null)
             {
                 // получем рецепт блюда
-                var dishRecipe = dish.Ingredients/*.Select(i => i.Id)*/.ToList();
+                var dishRecipe = dish.Ingredients.ToList();
                 // получаем все ингредиенты
                 var allIngredients = _context.Ingredients.ToList();
                 // получаем элементы рецепта, которые были добавлены

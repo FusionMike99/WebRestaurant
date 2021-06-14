@@ -1,0 +1,26 @@
+﻿@model WebApplicationRestaurant.Areas.RestaurantAdministration.ViewModels.MenuDishesViewModel
+
+@{
+    ViewBag.Title = "Зміна елементів меню";
+}
+
+<h2>Зміна елементів меню</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditMenuDishes" method="post">
+            <input type="hidden" name="menuId" value="@Model.MenuId" />
+            <div class="form-group">
+                @foreach (var dish in Model.Dishes)
+                {
+                    <input type="checkbox" name="dishesId" value="@dish.Id"
+                           @(Model.MenuItems.Contains(dish.Id) ? "checked=\"checked\"" : "") />@dish.Name <br />
+                    }
+            </div>
+            <button type="submit" class="btn btn-primary">Зберегти</button>
+        </form>
+    </div>
+</div>
+<div>
+    <a asp-action="Index">Повернутися до списку</a>
+</div>

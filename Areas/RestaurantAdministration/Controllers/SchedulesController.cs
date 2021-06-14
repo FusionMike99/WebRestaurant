@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using WebApplicationRestaurant.Areas.RestaurantAdministration.ViewModels;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
 
@@ -48,7 +49,6 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
         public IActionResult Create()
         {
             ViewData["UserId"] = new SelectList(_context.Users, "Id", "UserName");
-            ViewData["Places"] = new MultiSelectList(_context.Users, "Id", "Number");
             return View();
         }
 
@@ -60,10 +60,9 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
             {
                 _context.Add(schedule);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(EditSchedulePlaces), new { scheduleId = schedule.Id });
             }
             ViewData["UserId"] = new SelectList(_context.Users, "Id", "UserName", schedule.UserId);
-            ViewData["Places"] = new MultiSelectList(_context.Users, "Id", "Number", schedule.Places);
             return View(schedule);
         }
 
@@ -80,7 +79,6 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
                 return NotFound();
             }
             ViewData["UserId"] = new SelectList(_context.Users, "Id", "UserName", schedule.UserId);
-            ViewData["Places"] = new MultiSelectList(_context.Users, "Id", "Number", schedule.Places);
             return View(schedule);
         }
 
@@ -108,9 +106,62 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", schedule.UserId);
-            ViewData["Places"] = new MultiSelectList(_context.Users, "Id", "Number", schedule.Places);
+            ViewData["UserId"] = new SelectList(_context.Users, "Id", "UserName", schedule.UserId);
             return View(schedule);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditSchedulePlaces(int scheduleId)
+        {
+            // получаем график
+            var schedule = await _context.Schedules.Include(m => m.Places)
+                .FirstOrDefaultAsync(m => m.Id == scheduleId);
+            if (schedule != null)
+            {
+                // получем столики графика
+                var scheduleItems = schedule.Places.Select(i => i.Id).ToList();
+                // получаем все столики
+                var allPlaces = _context.Places.ToList();
+                SchedulePlacesViewModel model = new SchedulePlacesViewModel
+                {
+                    ScheduleId = schedule.Id,
+                    ScheduleItems = scheduleItems,
+                    Places = allPlaces
+                };
+                return View(model);
+            }
+
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditSchedulePlaces(int scheduleId, List<int> placesId)
+        {
+            // получаем меню
+            var schedule = await _context.Schedules.Include(m => m.Places)
+                .FirstOrDefaultAsync(m => m.Id == scheduleId);
+            var places = _context.Places.
+                Where(d => placesId.Contains(d.Id)).ToList();
+            if (schedule != null)
+            {
+                // получем столики графика
+                var scheduleItems = schedule.Places.ToList();
+                // получаем все столики
+                var allPlaces = _context.Places.ToList();
+                // получаем элементы меню, которые были добавлены
+                var addedScheduleItems = places.Except(scheduleItems);
+                // получаем элементы меню, которые были удалены
+                var removedScheduleItems = scheduleItems.Except(places);
+
+                schedule.Places.AddRange(addedScheduleItems);
+                schedule.Places.RemoveAll(a => removedScheduleItems.Any(b => b.Id == a.Id));
+
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("Index");
+            }
+
+            return NotFound();
         }
 
         public async Task<IActionResult> Delete(int? id)

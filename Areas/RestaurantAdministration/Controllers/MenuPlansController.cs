@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using WebApplicationRestaurant.Areas.RestaurantAdministration.ViewModels;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
 
@@ -45,7 +46,6 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
 
         public IActionResult Create()
         {
-            ViewData["Dishes"] = new MultiSelectList(_context.Dishes, "Id", "Name");
             return View();
         }
 
@@ -57,9 +57,8 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
             {
                 _context.Add(menuPlan);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(EditMenuDishes), new { menuId = menuPlan.Id });
             }
-            ViewData["Dishes"] = new MultiSelectList(_context.Dishes, "Id", "Name", menuPlan.Dishes);
             return View(menuPlan);
         }
 
@@ -77,7 +76,6 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
             {
                 return NotFound();
             }
-            ViewData["Dishes"] = new MultiSelectList(_context.Dishes, "Id", "Name", menuPlan.Dishes);
             return View(menuPlan);
         }
 
@@ -105,8 +103,61 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Dishes"] = new MultiSelectList(_context.Dishes, "Id", "Name", menuPlan.Dishes);
             return View(menuPlan);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditMenuDishes(int menuId)
+        {
+            // получаем меню
+            var menu = await _context.MenuPlans.Include(m => m.Dishes)
+                .FirstOrDefaultAsync(m => m.Id == menuId);
+            if (menu != null)
+            {
+                // получем элементы меню
+                var menuItems = menu.Dishes.Select(i => i.Id).ToList();
+                // получаем все блюда
+                var allDishes = _context.Dishes.ToList();
+                MenuDishesViewModel model = new MenuDishesViewModel
+                {
+                    MenuId = menu.Id,
+                    MenuItems = menuItems,
+                    Dishes = allDishes
+                };
+                return View(model);
+            }
+
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditMenuDishes(int menuId, List<int> dishesId)
+        {
+            // получаем меню
+            var menu = await _context.MenuPlans.Include(m => m.Dishes)
+                .FirstOrDefaultAsync(m => m.Id == menuId);
+            var dishes = _context.Dishes.
+                Where(d => dishesId.Contains(d.Id)).ToList();
+            if (menu != null)
+            {
+                // получем элементы меню
+                var menuItems = menu.Dishes.ToList();
+                // получаем все блюда
+                var allDishes = _context.Dishes.ToList();
+                // получаем элементы меню, которые были добавлены
+                var addedMenuItems = dishes.Except(menuItems);
+                // получаем элементы меню, которые были удалены
+                var removedMenuItems = menuItems.Except(dishes);
+
+                menu.Dishes.AddRange(addedMenuItems);
+                menu.Dishes.RemoveAll(a => removedMenuItems.Any(b => b.Id == a.Id));
+
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("Index");
+            }
+
+            return NotFound();
         }
 
         public async Task<IActionResult> Delete(int? id)

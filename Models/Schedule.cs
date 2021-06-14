@@ -9,6 +9,7 @@ namespace WebApplicationRestaurant.Models
         public int Id { get; set; }
         [Display(Name = "Дата роботи")]
         public DateTime WorkingDate { get; set; }
+        [Display(Name = "Офіціант")]
         public string UserId { get; set; }
 
         [Display(Name = "Офіціант")]

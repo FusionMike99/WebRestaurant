@@ -1,0 +1,26 @@
+﻿@model WebApplicationRestaurant.Areas.RestaurantAdministration.ViewModels.SchedulePlacesViewModel
+
+@{
+    ViewBag.Title = "Зміна столиків в графіку";
+}
+
+<h2>Зміна столиків в графіку</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditSchedulePlaces" method="post">
+            <input type="hidden" name="scheduleId" value="@Model.ScheduleId" />
+            <div class="form-group">
+                @foreach (var place in Model.Places)
+                {
+                    <input type="checkbox" name="placesId" value="@place.Id"
+                           @(Model.ScheduleItems.Contains(place.Id) ? "checked=\"checked\"" : "") />@place.Number <br />
+                    }
+            </div>
+            <button type="submit" class="btn btn-primary">Зберегти</button>
+        </form>
+    </div>
+</div>
+<div>
+    <a asp-action="Index">Повернутися до списку</a>
+</div>
