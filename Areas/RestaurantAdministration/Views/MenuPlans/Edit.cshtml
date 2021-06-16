@@ -15,12 +15,12 @@
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
                 <label asp-for="PlanStartDate" class="control-label"></label>
-                <input asp-for="PlanStartDate" class="form-control" />
+                <input asp-for="PlanStartDate" type="date" class="form-control" />
                 <span asp-validation-for="PlanStartDate" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="PlanEndDate" class="control-label"></label>
-                <input asp-for="PlanEndDate" class="form-control" />
+                <input asp-for="PlanEndDate" type="date" class="form-control" />
                 <span asp-validation-for="PlanEndDate" class="text-danger"></span>
             </div>
             <div class="form-group">

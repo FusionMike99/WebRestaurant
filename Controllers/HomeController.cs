@@ -1,23 +1,34 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.ViewModels;
 
 namespace WebApplicationRestaurant.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ApplicationContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ApplicationContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             if (User.Identity.IsAuthenticated)
             {
+                if (User.IsInRole("waiter"))
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var schedule = await _context.Schedules.Include(s => s.Places)
+                        .FirstOrDefaultAsync(s => s.UserId.Equals(userId) && s.WorkingDate.Date.Equals(System.DateTime.Today.Date));
+                    ViewBag.Places = schedule.Places;
+                }
                 return View();
             }
             else

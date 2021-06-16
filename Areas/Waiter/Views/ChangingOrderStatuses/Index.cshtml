@@ -48,10 +48,11 @@
             <td>
                 @if (item.StatusId.Equals(1))
                 {
-                    <div>
-                        <a class="btn btn-sm btn-danger" asp-action="CloseOrder" asp-route-id="@item.Id">Закрити замовлення</a>
-                    </div>
-                    <br />
+                <form asp-action="CloseOrder">
+                    <input type="hidden" name="id" value="@item.Id" />
+                    <input type="submit" value="Закрити замовлення" class="btn btn-danger" />
+                </form>
+                <br />
                 }
                 <div>
                     <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@item.Id">Подробиці</a>

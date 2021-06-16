@@ -1,5 +1,6 @@
-﻿
-<div>
+﻿@model IEnumerable<WebApplicationRestaurant.Models.Place>
+
+<div class="text-center">
     <a asp-area="Waiter" asp-action="Index" asp-controller="BookingTables">
         Резервація столику
     </a>
@@ -11,4 +12,14 @@
     <a asp-area="Waiter" asp-action="Index" asp-controller="Ordering">
         Оформлення замовлення
     </a>
+</div>
+<div class="text-center">
+    <br />
+    <p><b>Перелік номерів столиків, за які Ви відповідальні сьогодні:</b></p>
+    <ul style="list-style-position: inside">
+        @foreach (var item in Model)
+        {
+            <li>@Html.DisplayFor(modelItem => item.Number)</li>
+        }
+    </ul>
 </div>

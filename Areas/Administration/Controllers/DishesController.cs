@@ -37,6 +37,7 @@ namespace WebApplicationRestaurant.Areas.Administration.Controllers
             var dish = await _context.Dishes
                 .Include(d => d.Category)
                 .Include(d => d.DishUnit)
+                .Include(d => d.Ingredients)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (dish == null)
             {

@@ -25,8 +25,10 @@ namespace WebApplicationRestaurant.Areas.Waiter.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var applicationContext = _context.Dishes.Include(d => d.Category).Include(d => d.DishUnit);
-            return View(await applicationContext.ToListAsync());
+            var currentDate = DateTime.Now;
+            var menuPlan = await _context.MenuPlans.Include(m => m.Dishes)
+                .SingleOrDefaultAsync(mp => currentDate >= mp.PlanStartDate && currentDate <= mp.PlanEndDate);
+            return View(menuPlan.Dishes.ToList());
         }
 
         public IActionResult GoToCart()
@@ -66,9 +68,9 @@ namespace WebApplicationRestaurant.Areas.Waiter.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult ChangeCart(int? id, int count)
+        public IActionResult ChangeCart(int? dishId, int newCount)
         {
-            if (id == null)
+            if (dishId == null)
             {
                 return NotFound();
             }
@@ -76,9 +78,9 @@ namespace WebApplicationRestaurant.Areas.Waiter.Controllers
             if (ModelState.IsValid)
             {
                 var shoppingCart = HttpContext.Session.Get<List<ShoppingCartItem>>("shoppingCart");
-                var shoppingCartItem = shoppingCart.FirstOrDefault(sc => sc.DishId == id);
+                var shoppingCartItem = shoppingCart.FirstOrDefault(sc => sc.DishId == dishId);
                 if(shoppingCartItem != null)
-                    shoppingCartItem.Count += count;
+                    shoppingCartItem.Count = newCount;
                 HttpContext.Session.Set("shoppingCart", shoppingCart);
             }
             return RedirectToAction(nameof(GoToCart));

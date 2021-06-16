@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Generic;
+using System.Globalization;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
 
@@ -55,6 +58,14 @@ namespace WebApplicationRestaurant
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UseRequestLocalization();
+
+            var customCulture = new CultureInfo("ru-RU");
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+
+            CultureInfo.DefaultThreadCurrentCulture = customCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = customCulture;
 
             app.UseRouting();
 

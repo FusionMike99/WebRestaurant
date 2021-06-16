@@ -14,7 +14,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="OrderDate" class="control-label"></label>
-                <input asp-for="OrderDate" class="form-control" />
+                <input asp-for="OrderDate" class="form-control" value="@DateTime.Now" />
                 <span asp-validation-for="OrderDate" class="text-danger"></span>
             </div>
             <table class="table">

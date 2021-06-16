@@ -8,9 +8,13 @@ namespace WebApplicationRestaurant.Models
     {
         public int Id { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy}", ApplyFormatInEditMode = true)]
+        [DataType(DataType.Date)]
         [Display(Name = "Дата початку плану")]
         public DateTime PlanStartDate { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy}", ApplyFormatInEditMode = true)]
+        [DataType(DataType.Date)]
         [Display(Name = "Дата закінчення плану")]
         public DateTime PlanEndDate { get; set; }
 

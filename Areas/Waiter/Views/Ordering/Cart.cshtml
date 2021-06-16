@@ -22,24 +22,34 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Dish.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Count)
-            </td>
-            <td>
-                <a asp-action="ChangeCart" asp-route-id="@item.DishId" asp-route-count="1">Збільшити</a> |
-                <a asp-action="ChangeCart" asp-route-id="@item.DishId" asp-route-count="-1">Зменьшити</a> |
-                <a asp-action="DeleteFromCart" asp-route-id="@item.DishId">Видалити з кошику</a>
-            </td>
-        </tr>
-}
+        @for (int i = 0; i < Model.Count(); i++)
+        {
+            var item = Model.ElementAt(i);
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Dish.Name)
+                </td>
+                <td>
+                    <form id="@String.Concat("ChangeCartForm", @i)" asp-action="ChangeCart" method="post">
+                        <input type="hidden" name="dishId" value="@item.DishId" />
+                        <div>
+                            <input type="number" name="newCount" value="@item.Count" min="1" />
+                        </div>
+                    </form>
+                </td>
+                <td>
+                    <input type="submit" value="Змінити" class="btn btn-primary" form="@String.Concat("ChangeCartForm", @i)" />
+                    <a asp-action="DeleteFromCart" asp-route-id="@item.DishId" class="btn btn-danger">Видалити з кошику</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 <p>
     <a asp-action="ClearCart">Очистити кошик</a> |
     <a asp-action="Index">Повернутися до списку</a>
 </p>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

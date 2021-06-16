@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 using WebApplicationRestaurant.Areas.RestaurantAdministration.ViewModels;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
@@ -53,6 +54,22 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,PlanStartDate,PlanEndDate")] MenuPlan menuPlan)
         {
+            if (menuPlan.PlanStartDate > menuPlan.PlanEndDate)
+                ModelState.AddModelError("", "Дата початку не повина бути більшою ніж дата кінця");
+
+            var paramStartDate = new SqlParameter("@StartDate", menuPlan.PlanStartDate);
+            var paramEndDate = new SqlParameter("@EndDate", menuPlan.PlanEndDate);
+            var paramResult = new SqlParameter
+            {
+                ParameterName = "@Result",
+                SqlDbType = System.Data.SqlDbType.Bit,
+                Direction = System.Data.ParameterDirection.Output
+            };
+            _context.Database.ExecuteSqlRaw("EXEC IsExistMenuPlan @StartDate, @EndDate, @Result OUTPUT", paramStartDate, paramEndDate, paramResult);
+            var resultValue = (bool) paramResult.Value;
+            if(resultValue)
+                ModelState.AddModelError("", "План меню перетинаєтся з існуючими планами");
+
             if (ModelState.IsValid)
             {
                 _context.Add(menuPlan);
@@ -83,6 +100,9 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([Bind("Id,PlanStartDate,PlanEndDate")] MenuPlan menuPlan)
         {
+            if (menuPlan.PlanStartDate > menuPlan.PlanEndDate)
+                ModelState.AddModelError("", "Дата початку не повина бути більшою ніж дата кінця");
+
             if (ModelState.IsValid)
             {
                 try

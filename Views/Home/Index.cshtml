@@ -5,20 +5,20 @@
 <div class="text-center">
     <h1 class="display-4">Вітаємо у системі підтримки менеджменту роботи ресторану</h1>
     <p>Натисніть на одне із посиланнь, щоб перейти до потрібної функції системи:</p>
-    @if (User.IsInRole("adminIS"))
-    {
-        @await Html.PartialAsync("AdministrationLinks")
-    }
-    else if (User.IsInRole("adminRes"))
-    {
-        @await Html.PartialAsync("RestaurantAdministrationLinks")
-    }
-    else if (User.IsInRole("cooker"))
-    {
-        @await Html.PartialAsync("CookerLinks")
-    }
-    else if (User.IsInRole("waiter"))
-    {
-        @await Html.PartialAsync("WaiterLinks")
-    }
 </div>
+@if (User.IsInRole("adminIS"))
+{
+    @await Html.PartialAsync("AdministrationLinks")
+}
+else if (User.IsInRole("adminRes"))
+{
+    @await Html.PartialAsync("RestaurantAdministrationLinks")
+}
+else if (User.IsInRole("cooker"))
+{
+    @await Html.PartialAsync("CookerLinks")
+}
+else if (User.IsInRole("waiter"))
+{
+    @await Html.PartialAsync("WaiterLinks", new List<Place>(ViewBag.Places))
+}

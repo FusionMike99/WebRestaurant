@@ -28,7 +28,7 @@
                 @Html.DisplayFor(modelItem => item.WorkingDate)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.User.UserName)
+                @Html.DisplayFor(modelItem => item.User.Name) @Html.DisplayFor(modelItem => item.User.Surname)
             </td>
             <td>
                 <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@item.Id">Змінити</a>

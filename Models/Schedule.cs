@@ -7,6 +7,8 @@ namespace WebApplicationRestaurant.Models
     public class Schedule
     {
         public int Id { get; set; }
+        [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy}", ApplyFormatInEditMode = true)]
+        [DataType(DataType.Date)]
         [Display(Name = "Дата роботи")]
         public DateTime WorkingDate { get; set; }
         [Display(Name = "Офіціант")]

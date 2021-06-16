@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -15,10 +16,12 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
     public class SchedulesController : Controller
     {
         private readonly ApplicationContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public SchedulesController(ApplicationContext context)
+        public SchedulesController(ApplicationContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
@@ -48,7 +51,7 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
 
         public IActionResult Create()
         {
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "UserName");
+            ViewData["UserId"] = new SelectList(_userManager.GetUsersInRoleAsync("waiter").Result, "Id", "Surname");
             return View();
         }
 
@@ -56,13 +59,17 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,WorkingDate,UserId")] Schedule schedule)
         {
+            if (_context.Schedules.Any(s => s.WorkingDate.Equals(schedule.WorkingDate)
+                 && s.UserId.Equals(schedule.UserId)))
+                ModelState.AddModelError("", $"Для даного співробітника вже існує графік на {schedule.WorkingDate.ToShortDateString()}");
+
             if (ModelState.IsValid)
             {
                 _context.Add(schedule);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(EditSchedulePlaces), new { scheduleId = schedule.Id });
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "UserName", schedule.UserId);
+            ViewData["UserId"] = new SelectList(_userManager.GetUsersInRoleAsync("waiter").Result, "Id", "Surname");
             return View(schedule);
         }
 
@@ -78,7 +85,7 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
             {
                 return NotFound();
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "UserName", schedule.UserId);
+            ViewData["UserId"] = new SelectList(_userManager.GetUsersInRoleAsync("waiter").Result, "Id", "Surname", schedule.UserId);
             return View(schedule);
         }
 
@@ -86,6 +93,10 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([Bind("Id,WorkingDate,UserId")] Schedule schedule)
         {
+            if (_context.Schedules.Any(s => s.WorkingDate.Equals(schedule.WorkingDate)
+                 && s.UserId.Equals(schedule.UserId)))
+                ModelState.AddModelError("", $"Для даного співробітника вже існує графік на {schedule.WorkingDate.ToShortDateString()}");
+
             if (ModelState.IsValid)
             {
                 try
@@ -106,7 +117,7 @@ namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "UserName", schedule.UserId);
+            ViewData["UserId"] = new SelectList(_userManager.GetUsersInRoleAsync("waiter").Result, "Id", "Surname", schedule.UserId);
             return View(schedule);
         }
 

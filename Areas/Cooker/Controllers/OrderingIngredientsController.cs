@@ -68,9 +68,9 @@ namespace WebApplicationRestaurant.Areas.Cooker.Controllers
         }
 
 
-        public IActionResult ChangeCart(int? id, int count)
+        public IActionResult ChangeCart(int? ingredientId, decimal newCount)
         {
-            if (id == null)
+            if (ingredientId == null)
             {
                 return NotFound();
             }
@@ -78,9 +78,9 @@ namespace WebApplicationRestaurant.Areas.Cooker.Controllers
             if (ModelState.IsValid)
             {
                 var ingredientsCart = HttpContext.Session.Get<List<OrderIngredientsItem>>("ingredientsCart");
-                var ingredientsCartItem = ingredientsCart.FirstOrDefault(ic => ic.IngredientId == id);
+                var ingredientsCartItem = ingredientsCart.FirstOrDefault(ic => ic.IngredientId == ingredientId);
                 if (ingredientsCartItem != null)
-                    ingredientsCartItem.Count += count;
+                    ingredientsCartItem.Count = newCount;
                 HttpContext.Session.Set("ingredientsCart", ingredientsCart);
             }
             return RedirectToAction(nameof(GoToCart));
