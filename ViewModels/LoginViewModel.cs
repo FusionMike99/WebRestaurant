@@ -1,21 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace WebApplicationRestaurant.ViewModels
+namespace WebApplicationRestaurant.ViewModels;
+
+public class LoginViewModel
 {
-    public class LoginViewModel
-    {
-        [Required]
-        [Display(Name = "Логін")]
-        public string UserName { get; set; }
+    [Required]
+    [Display(Name = "Логін")]
+    public string UserName { get; set; } = string.Empty;
 
-        [Required]
-        [DataType(DataType.Password)]
-        [Display(Name = "Пароль")]
-        public string Password { get; set; }
+    [Required]
+    [DataType(DataType.Password)]
+    [Display(Name = "Пароль")]
+    public string Password { get; set; } = string.Empty;
 
-        [Display(Name = "Запам'ятати?")]
-        public bool RememberMe { get; set; }
+    [Display(Name = "Запам'ятати?")]
+    public bool RememberMe { get; set; }
 
-        public string ReturnUrl { get; set; }
-    }
+    public string? ReturnUrl { get; set; }
 }
