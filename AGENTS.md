@@ -33,6 +33,8 @@ dotnet run
   - **Code navigation & symbol lookups**: Prefer `search_symbol`, `find_usages`, `find_implementations`, and `get_symbol_info` over text/grep searches.
   - **Refactoring & formatting**: Prefer Rider refactoring tools (`rename_refactoring`, `move_type_to_namespace`, `extract_method`, `reformat_file`) over manual multi-file edits.
   - **Diagnostics & builds**: Prefer `get_file_problems`, `lint_files`, `get_project_problems`, `post_edit_quality_check`, and `build_solution_start` / `build_solution_state` for IDE inspections and builds, falling back to CLI `dotnet build` only if Rider MCP is unavailable or disconnected.
+- **Microsoft Learn MCP (`.mcp.json`)**: Configured with `microsoft-learn` (`https://learn.microsoft.com/api/mcp`) for up-to-date ASP.NET Core 11, EF Core 11, Identity, and C# 15 documentation and code samples (`microsoft_docs_search`, `microsoft_docs_fetch`, `microsoft_code_sample_search`).
+- **Repository Skills & Custom Agents**: Curated skills live in `.agents/skills/` (Microsoft Learn docs/reference/CLI, EF Core query optimization, data-driven ASP.NET Core MVC scaffolding, C# refactoring, .NET performance analysis, `System.Text.Json` .NET 11, and .NET testing workflows) and custom agents live in `.github/agents/` (`optimizing-dotnet-performance.agent.md`). See `.agents/README.md` for upstream sources and pinned versions.
 
 ## Architecture & Directory Structure
 
