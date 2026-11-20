@@ -1,89 +1,76 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using WebApplicationRestaurant.Data;
 
-namespace WebApplicationRestaurant.Areas.Administration.Controllers
+namespace WebApplicationRestaurant.Areas.Administration.Controllers;
+
+[Area("Administration")]
+public class ChangingOrderIngredientsStatusesController(ApplicationContext context) : Controller
 {
-    [Area("Administration")]
-    public class ChangingOrderIngredientsStatusesController : Controller
+    public async Task<IActionResult> Index()
     {
-        private readonly ApplicationContext _context;
-
-        public ChangingOrderIngredientsStatusesController(ApplicationContext context)
-        {
-            _context = context;
-        }
-
-        public async Task<IActionResult> Index()
-        {
-            var applicationContext = _context.OrderIngredients.Include(o => o.Status)
-                .Include(o => o.User).Include(o => o.OrderIngredientsItems);
-            return View(await applicationContext.ToListAsync());
-        }
-
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var order = await _context.OrderIngredients
-                .Include(o => o.Status)
-                .Include(o => o.User)
-                .Include(o => o.OrderIngredientsItems)
-                    .ThenInclude(sc => sc.Ingredient)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            return View(order);
-        }
-
-        public async Task<IActionResult> CloseOrder(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var order = await _context.OrderIngredients.FindAsync(id);
-            order.StatusId = 2;
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(order);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!OrderIngredientsExists(order.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(order);
-        }
-
-        private bool OrderIngredientsExists(int id)
-        {
-            return _context.OrderIngredients.Any(e => e.Id == id);
-        }
+        var applicationContext = context.OrderIngredients
+            .Include(o => o.Status)
+            .Include(o => o.User)
+            .Include(o => o.OrderIngredientsItems);
+        return View(await applicationContext.ToListAsync());
     }
+
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (id is null)
+        {
+            return NotFound();
+        }
+
+        var order = await context.OrderIngredients
+            .Include(o => o.Status)
+            .Include(o => o.User)
+            .Include(o => o.OrderIngredientsItems)
+                .ThenInclude(sc => sc.Ingredient)
+            .FirstOrDefaultAsync(m => m.Id == id);
+
+        return order is null ? NotFound() : View(order);
+    }
+
+    public async Task<IActionResult> CloseOrder(int? id)
+    {
+        if (id is null)
+        {
+            return NotFound();
+        }
+
+        var order = await context.OrderIngredients.FindAsync(id);
+        if (order is null)
+        {
+            return NotFound();
+        }
+
+        order.StatusId = 2;
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                context.Update(order);
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!OrderIngredientsExists(order.Id))
+                {
+                    return NotFound();
+                }
+
+                throw;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        return View(order);
+    }
+
+    private bool OrderIngredientsExists(int id) =>
+        context.OrderIngredients.Any(e => e.Id == id);
 }
