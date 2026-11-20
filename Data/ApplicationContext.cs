@@ -1,39 +1,30 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using WebApplicationRestaurant.Models;
 
-#nullable disable
+namespace WebApplicationRestaurant.Data;
 
-namespace WebApplicationRestaurant.Data
+public class ApplicationContext(DbContextOptions<ApplicationContext> options) : IdentityDbContext<User>(options)
 {
-    public class ApplicationContext : IdentityDbContext<User>
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Dish> Dishes => Set<Dish>();
+    public DbSet<DishStatus> DishStatuses => Set<DishStatus>();
+    public DbSet<DishUnit> DishUnits => Set<DishUnit>();
+    public DbSet<Ingredient> Ingredients => Set<Ingredient>();
+    public DbSet<IngredientUnit> IngredientUnits => Set<IngredientUnit>();
+    public DbSet<MenuPlan> MenuPlans => Set<MenuPlan>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderIngredients> OrderIngredients => Set<OrderIngredients>();
+    public DbSet<OrderIngredientsItem> OrderIngredientsItem => Set<OrderIngredientsItem>();
+    public DbSet<OrderIngredientsStatus> OrderIngredientsStatuses => Set<OrderIngredientsStatus>();
+    public DbSet<OrderStatus> OrderStatuses => Set<OrderStatus>();
+    public DbSet<Place> Places => Set<Place>();
+    public DbSet<Schedule> Schedules => Set<Schedule>();
+    public DbSet<ShoppingCartItem> ShoppingCartItem => Set<ShoppingCartItem>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        public ApplicationContext(DbContextOptions<ApplicationContext> options)
-            : base(options)
-        {
-
-        }
-
-        public DbSet<Category> Categories { get; set; }
-        public DbSet<Dish> Dishes { get; set; }
-        public DbSet<DishStatus> DishStatuses { get; set; }
-        public DbSet<DishUnit> DishUnits { get; set; }
-        public DbSet<Ingredient> Ingredients { get; set; }
-        public DbSet<IngredientUnit> IngredientUnits { get; set; }
-        public DbSet<MenuPlan> MenuPlans { get; set; }
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderIngredients> OrderIngredients { get; set; }
-        public DbSet<OrderIngredientsItem> OrderIngredientsItem { get; set; }
-        public DbSet<OrderIngredientsStatus> OrderIngredientsStatuses { get; set; }
-        public DbSet<OrderStatus> OrderStatuses { get; set; }
-        public DbSet<Place> Places { get; set; }
-        public DbSet<Schedule> Schedules { get; set; }
-        public DbSet<ShoppingCartItem> ShoppingCartItem { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Category>(entity =>
             {
@@ -422,6 +413,5 @@ namespace WebApplicationRestaurant.Data
                     .HasColumnName("Surname")
                     .IsFixedLength(true);
             });
-        }
     }
 }

@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 @model WebApplicationRestaurant.Areas.Administration.ViewModels.ChangeRoleViewModel
 
 @{
@@ -15,8 +15,8 @@
                 @foreach (IdentityRole role in Model.AllRoles)
                 {
                     <input type="checkbox" name="roles" value="@role.Name"
-                           @(Model.UserRoles.Contains(role.Name) ? "checked=\"checked\"" : "") />@role.Name <br />
-                    }
+                           @(role.Name is not null && Model.UserRoles.Contains(role.Name) ? "checked=\"checked\"" : "") />@role.Name <br />
+                }
             </div>
             <button type="submit" class="btn btn-primary">Зберегти</button>
         </form>

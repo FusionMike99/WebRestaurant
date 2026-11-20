@@ -1,144 +1,126 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
 
-namespace WebApplicationRestaurant.Areas.Administration.Controllers
+namespace WebApplicationRestaurant.Areas.Administration.Controllers;
+
+[Area("Administration")]
+public class IngredientsController(ApplicationContext context) : Controller
 {
-    [Area("Administration")]
-    public class IngredientsController : Controller
+    public async Task<IActionResult> Index()
     {
-        private readonly ApplicationContext _context;
+        var applicationContext = context.Ingredients.Include(i => i.IngredientUnit);
+        return View(await applicationContext.ToListAsync());
+    }
 
-        public IngredientsController(ApplicationContext context)
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (id is null)
         {
-            _context = context;
+            return NotFound();
         }
 
-        public async Task<IActionResult> Index()
+        var ingredient = await context.Ingredients
+            .Include(i => i.IngredientUnit)
+            .FirstOrDefaultAsync(m => m.Id == id);
+        return ingredient is null ? NotFound() : View(ingredient);
+    }
+
+    public IActionResult Create()
+    {
+        ViewData["IngredientUnitId"] = new SelectList(context.IngredientUnits, "Id", "Name");
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([Bind("Id,Name,Count,DeliveryDate,IngredientUnitId")] Ingredient ingredient)
+    {
+        if (ModelState.IsValid)
         {
-            var applicationContext = _context.Ingredients.Include(i => i.IngredientUnit);
-            return View(await applicationContext.ToListAsync());
-        }
-
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var ingredient = await _context.Ingredients
-                .Include(i => i.IngredientUnit)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (ingredient == null)
-            {
-                return NotFound();
-            }
-
-            return View(ingredient);
-        }
-
-        public IActionResult Create()
-        {
-            ViewData["IngredientUnitId"] = new SelectList(_context.IngredientUnits, "Id", "Name");
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Count,DeliveryDate,IngredientUnitId")] Ingredient ingredient)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(ingredient);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["IngredientUnitId"] = new SelectList(_context.IngredientUnits, "Id", "Name", ingredient.IngredientUnitId);
-            return View(ingredient);
-        }
-
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var ingredient = await _context.Ingredients.FindAsync(id);
-            if (ingredient == null)
-            {
-                return NotFound();
-            }
-            ViewData["IngredientUnitId"] = new SelectList(_context.IngredientUnits, "Id", "Name", ingredient.IngredientUnitId);
-            return View(ingredient);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([Bind("Id,Name,Count,DeliveryDate,IngredientUnitId")] Ingredient ingredient)
-        {
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(ingredient);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!IngredientExists(ingredient.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["IngredientUnitId"] = new SelectList(_context.IngredientUnits, "Id", "Name", ingredient.IngredientUnitId);
-            return View(ingredient);
-        }
-
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var ingredient = await _context.Ingredients
-                .Include(i => i.IngredientUnit)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (ingredient == null)
-            {
-                return NotFound();
-            }
-
-            return View(ingredient);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var ingredient = await _context.Ingredients.FindAsync(id);
-            _context.Ingredients.Remove(ingredient);
-            await _context.SaveChangesAsync();
+            context.Add(ingredient);
+            await context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool IngredientExists(int id)
-        {
-            return _context.Ingredients.Any(e => e.Id == id);
-        }
+        ViewData["IngredientUnitId"] = new SelectList(context.IngredientUnits, "Id", "Name", ingredient.IngredientUnitId);
+        return View(ingredient);
     }
+
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id is null)
+        {
+            return NotFound();
+        }
+
+        var ingredient = await context.Ingredients.FindAsync(id);
+        if (ingredient is null)
+        {
+            return NotFound();
+        }
+
+        ViewData["IngredientUnitId"] = new SelectList(context.IngredientUnits, "Id", "Name", ingredient.IngredientUnitId);
+        return View(ingredient);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit([Bind("Id,Name,Count,DeliveryDate,IngredientUnitId")] Ingredient ingredient)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                context.Update(ingredient);
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!IngredientExists(ingredient.Id))
+                {
+                    return NotFound();
+                }
+
+                throw;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        ViewData["IngredientUnitId"] = new SelectList(context.IngredientUnits, "Id", "Name", ingredient.IngredientUnitId);
+        return View(ingredient);
+    }
+
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id is null)
+        {
+            return NotFound();
+        }
+
+        var ingredient = await context.Ingredients
+            .Include(i => i.IngredientUnit)
+            .FirstOrDefaultAsync(m => m.Id == id);
+        return ingredient is null ? NotFound() : View(ingredient);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var ingredient = await context.Ingredients.FindAsync(id);
+        if (ingredient is not null)
+        {
+            context.Ingredients.Remove(ingredient);
+            await context.SaveChangesAsync();
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    private bool IngredientExists(int id) =>
+        context.Ingredients.Any(e => e.Id == id);
 }

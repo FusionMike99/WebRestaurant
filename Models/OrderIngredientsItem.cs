@@ -1,18 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace WebApplicationRestaurant.Models
+namespace WebApplicationRestaurant.Models;
+
+public class OrderIngredientsItem
 {
-    public class OrderIngredientsItem
-    {
-        public int IngredientId { get; set; }
-        [Display(Name = "Інгредієнт")]
-        public Ingredient Ingredient { get; set; }
+    public int IngredientId { get; set; }
 
-        public int OrderIngredientsId { get; set; }
-        [Display(Name = "Замовлення")]
-        public OrderIngredients OrderIngredients { get; set; }
+    [Display(Name = "Інгредієнт")]
+    public Ingredient Ingredient { get; set; } = null!;
 
-        [Display(Name = "Кількість")]
-        public decimal Count { get; set; } = 1;
-    }
+    public int OrderIngredientsId { get; set; }
+
+    [Display(Name = "Замовлення")]
+    public OrderIngredients OrderIngredients { get; set; } = null!;
+
+    [Display(Name = "Кількість")]
+    public decimal Count { get; set; } = 1;
 }
