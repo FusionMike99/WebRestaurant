@@ -1,60 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Data;
-using WebApplicationRestaurant.Models;
 
-namespace WebApplicationRestaurant.Areas.Cooker.Controllers
+namespace WebApplicationRestaurant.Areas.Cooker.Controllers;
+
+[Area("Cooker")]
+[Authorize(Roles = "cooker")]
+public class ChangingDishStatusesController(ApplicationContext context) : Controller
 {
-    [Area("Cooker")]
-    [Authorize(Roles = "cooker")]
-    public class ChangingDishStatusesController : Controller
+    public async Task<IActionResult> Index() =>
+        View(await context.ShoppingCartItem
+            .Where(sci => sci.DishStatusId != 3)
+            .Include(sc => sc.Order)
+            .Include(sc => sc.Dish)
+            .Include(sc => sc.DishStatus)
+            .ToListAsync());
+
+    public async Task<IActionResult> ChangeStatus(int? idOrder, int? idDish, int idStatus)
     {
-        private readonly ApplicationContext _context;
-
-        public ChangingDishStatusesController(ApplicationContext context)
+        try
         {
-            _context = context;
-        }
-
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.ShoppingCartItem.Where(sci => !sci.DishStatusId.Equals(3))
-                .Include(sc => sc.Order).Include(sc => sc.Dish)
-                .Include(sc => sc.DishStatus).ToListAsync());
-        }
-
-        public async Task<IActionResult> ChangeStatus(int? idOrder, int? idDish, int idStatus)
-        {
-            try
+            var shoppingCartItem = await context.ShoppingCartItem.FindAsync(idOrder, idDish);
+            if (shoppingCartItem is null)
             {
-                var shoppingCartItem = await _context.ShoppingCartItem.FindAsync(idOrder, idDish);
-                shoppingCartItem.DishStatusId = idStatus;
-                _context.Update(shoppingCartItem);
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
-            catch (DbUpdateConcurrencyException)
+
+            shoppingCartItem.DishStatusId = idStatus;
+            context.Update(shoppingCartItem);
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ShoppingCartItemExists(idOrder, idDish))
             {
-                if (!ShoppingCartItemExists(idOrder, idDish))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
-            return RedirectToAction(nameof(Index));
+
+            throw;
         }
 
-        private bool ShoppingCartItemExists(int? idOrder, int? idDish)
-        {
-            return _context.ShoppingCartItem.Any(e => e.OrderId == idOrder && e.DishId == idDish);
-        }
+        return RedirectToAction(nameof(Index));
     }
+
+    private bool ShoppingCartItemExists(int? idOrder, int? idDish) =>
+        context.ShoppingCartItem.Any(e => e.OrderId == idOrder && e.DishId == idDish);
 }
