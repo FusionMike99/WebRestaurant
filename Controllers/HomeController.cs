@@ -1,51 +1,35 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.ViewModels;
 
-namespace WebApplicationRestaurant.Controllers
+namespace WebApplicationRestaurant.Controllers;
+
+public class HomeController(ApplicationContext context) : Controller
 {
-    public class HomeController : Controller
+    public async Task<IActionResult> Index()
     {
-        private readonly ApplicationContext _context;
-
-        public HomeController(ApplicationContext context)
+        if (User.Identity?.IsAuthenticated == true)
         {
-            _context = context;
-        }
-
-        public async Task<IActionResult> Index()
-        {
-            if (User.Identity.IsAuthenticated)
+            if (User.IsInRole("waiter"))
             {
-                if (User.IsInRole("waiter"))
-                {
-                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    var schedule = await _context.Schedules.Include(s => s.Places)
-                        .FirstOrDefaultAsync(s => s.UserId.Equals(userId) && s.WorkingDate.Date.Equals(System.DateTime.Today.Date));
-                    ViewBag.Places = schedule.Places;
-                }
-                return View();
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var schedule = await context.Schedules.Include(s => s.Places)
+                    .FirstOrDefaultAsync(s => s.UserId == userId && s.WorkingDate.Date == DateTime.Today.Date);
+                ViewBag.Places = schedule?.Places ?? [];
             }
-            else
-            {
-                return RedirectToAction("Login", "Account");
-            }
-        }
 
-        public IActionResult Privacy()
-        {
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        return RedirectToAction("Login", "Account");
     }
+
+    public IActionResult Privacy() => View();
+
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error() =>
+        View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 }

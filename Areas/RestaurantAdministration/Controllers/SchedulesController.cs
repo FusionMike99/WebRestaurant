@@ -1,7 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -10,202 +6,179 @@ using WebApplicationRestaurant.Areas.RestaurantAdministration.ViewModels;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
 
-namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers
+namespace WebApplicationRestaurant.Areas.RestaurantAdministration.Controllers;
+
+[Area("RestaurantAdministration")]
+public class SchedulesController(ApplicationContext context, UserManager<User> userManager) : Controller
 {
-    [Area("RestaurantAdministration")]
-    public class SchedulesController : Controller
+    public async Task<IActionResult> Index()
     {
-        private readonly ApplicationContext _context;
-        private readonly UserManager<User> _userManager;
+        var applicationContext = context.Schedules.Include(s => s.User);
+        return View(await applicationContext.ToListAsync());
+    }
 
-        public SchedulesController(ApplicationContext context, UserManager<User> userManager)
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (id is null)
         {
-            _context = context;
-            _userManager = userManager;
-        }
-
-        public async Task<IActionResult> Index()
-        {
-            var applicationContext = _context.Schedules.Include(s => s.User);
-            return View(await applicationContext.ToListAsync());
-        }
-
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var schedule = await _context.Schedules
-                .Include(s => s.User)
-                .Include(s => s.Places)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (schedule == null)
-            {
-                return NotFound();
-            }
-
-            return View(schedule);
-        }
-
-        public IActionResult Create()
-        {
-            ViewData["UserId"] = new SelectList(_userManager.GetUsersInRoleAsync("waiter").Result, "Id", "Surname");
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,WorkingDate,UserId")] Schedule schedule)
-        {
-            if (_context.Schedules.Any(s => s.WorkingDate.Equals(schedule.WorkingDate)
-                 && s.UserId.Equals(schedule.UserId)))
-                ModelState.AddModelError("", $"Для даного співробітника вже існує графік на {schedule.WorkingDate.ToShortDateString()}");
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(schedule);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(EditSchedulePlaces), new { scheduleId = schedule.Id });
-            }
-            ViewData["UserId"] = new SelectList(_userManager.GetUsersInRoleAsync("waiter").Result, "Id", "Surname");
-            return View(schedule);
-        }
-
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var schedule = await _context.Schedules.FindAsync(id);
-            if (schedule == null)
-            {
-                return NotFound();
-            }
-            ViewData["UserId"] = new SelectList(_userManager.GetUsersInRoleAsync("waiter").Result, "Id", "Surname", schedule.UserId);
-            return View(schedule);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([Bind("Id,WorkingDate,UserId")] Schedule schedule)
-        {
-            if (_context.Schedules.Any(s => s.WorkingDate.Equals(schedule.WorkingDate)
-                 && s.UserId.Equals(schedule.UserId)))
-                ModelState.AddModelError("", $"Для даного співробітника вже існує графік на {schedule.WorkingDate.ToShortDateString()}");
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(schedule);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ScheduleExists(schedule.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["UserId"] = new SelectList(_userManager.GetUsersInRoleAsync("waiter").Result, "Id", "Surname", schedule.UserId);
-            return View(schedule);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> EditSchedulePlaces(int scheduleId)
-        {
-            // получаем график
-            var schedule = await _context.Schedules.Include(m => m.Places)
-                .FirstOrDefaultAsync(m => m.Id == scheduleId);
-            if (schedule != null)
-            {
-                // получем столики графика
-                var scheduleItems = schedule.Places.Select(i => i.Id).ToList();
-                // получаем все столики
-                var allPlaces = _context.Places.ToList();
-                SchedulePlacesViewModel model = new SchedulePlacesViewModel
-                {
-                    ScheduleId = schedule.Id,
-                    ScheduleItems = scheduleItems,
-                    Places = allPlaces
-                };
-                return View(model);
-            }
-
             return NotFound();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> EditSchedulePlaces(int scheduleId, List<int> placesId)
+        var schedule = await context.Schedules
+            .Include(s => s.User)
+            .Include(s => s.Places)
+            .FirstOrDefaultAsync(m => m.Id == id);
+        return schedule is null ? NotFound() : View(schedule);
+    }
+
+    public async Task<IActionResult> Create()
+    {
+        ViewData["UserId"] = new SelectList(await userManager.GetUsersInRoleAsync("waiter"), "Id", "Surname");
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([Bind("Id,WorkingDate,UserId")] Schedule schedule)
+    {
+        if (context.Schedules.Any(s => s.WorkingDate == schedule.WorkingDate && s.UserId == schedule.UserId))
         {
-            // получаем меню
-            var schedule = await _context.Schedules.Include(m => m.Places)
-                .FirstOrDefaultAsync(m => m.Id == scheduleId);
-            var places = _context.Places.
-                Where(d => placesId.Contains(d.Id)).ToList();
-            if (schedule != null)
-            {
-                // получем столики графика
-                var scheduleItems = schedule.Places.ToList();
-                // получаем все столики
-                var allPlaces = _context.Places.ToList();
-                // получаем элементы меню, которые были добавлены
-                var addedScheduleItems = places.Except(scheduleItems);
-                // получаем элементы меню, которые были удалены
-                var removedScheduleItems = scheduleItems.Except(places);
+            ModelState.AddModelError("", $"Для даного співробітника вже існує графік на {schedule.WorkingDate.ToShortDateString()}");
+        }
 
-                schedule.Places.AddRange(addedScheduleItems);
-                schedule.Places.RemoveAll(a => removedScheduleItems.Any(b => b.Id == a.Id));
+        if (ModelState.IsValid)
+        {
+            context.Add(schedule);
+            await context.SaveChangesAsync();
+            return RedirectToAction(nameof(EditSchedulePlaces), new { scheduleId = schedule.Id });
+        }
 
-                await _context.SaveChangesAsync();
+        ViewData["UserId"] = new SelectList(await userManager.GetUsersInRoleAsync("waiter"), "Id", "Surname");
+        return View(schedule);
+    }
 
-                return RedirectToAction("Index");
-            }
-
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id is null)
+        {
             return NotFound();
         }
 
-        public async Task<IActionResult> Delete(int? id)
+        var schedule = await context.Schedules.FindAsync(id);
+        if (schedule is null)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var schedule = await _context.Schedules
-                .Include(s => s.User)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (schedule == null)
-            {
-                return NotFound();
-            }
-
-            return View(schedule);
+            return NotFound();
         }
 
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        ViewData["UserId"] = new SelectList(await userManager.GetUsersInRoleAsync("waiter"), "Id", "Surname", schedule.UserId);
+        return View(schedule);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit([Bind("Id,WorkingDate,UserId")] Schedule schedule)
+    {
+        if (context.Schedules.Any(s => s.WorkingDate == schedule.WorkingDate && s.UserId == schedule.UserId))
         {
-            var schedule = await _context.Schedules.FindAsync(id);
-            _context.Schedules.Remove(schedule);
-            await _context.SaveChangesAsync();
+            ModelState.AddModelError("", $"Для даного співробітника вже існує графік на {schedule.WorkingDate.ToShortDateString()}");
+        }
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                context.Update(schedule);
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ScheduleExists(schedule.Id))
+                {
+                    return NotFound();
+                }
+
+                throw;
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ScheduleExists(int id)
-        {
-            return _context.Schedules.Any(e => e.Id == id);
-        }
+        ViewData["UserId"] = new SelectList(await userManager.GetUsersInRoleAsync("waiter"), "Id", "Surname", schedule.UserId);
+        return View(schedule);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> EditSchedulePlaces(int scheduleId)
+    {
+        var schedule = await context.Schedules.Include(m => m.Places)
+            .FirstOrDefaultAsync(m => m.Id == scheduleId);
+        if (schedule is not null)
+        {
+            var scheduleItems = schedule.Places.Select(i => i.Id).ToList();
+            var allPlaces = await context.Places.ToListAsync();
+            SchedulePlacesViewModel model = new()
+            {
+                ScheduleId = schedule.Id,
+                ScheduleItems = scheduleItems,
+                Places = allPlaces
+            };
+            return View(model);
+        }
+
+        return NotFound();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> EditSchedulePlaces(int scheduleId, List<int> placesId)
+    {
+        var schedule = await context.Schedules.Include(m => m.Places)
+            .FirstOrDefaultAsync(m => m.Id == scheduleId);
+        var places = await context.Places
+            .Where(d => placesId.Contains(d.Id)).ToListAsync();
+        if (schedule is not null)
+        {
+            var scheduleItems = schedule.Places.ToList();
+            var addedScheduleItems = places.Except(scheduleItems);
+            var removedScheduleItems = scheduleItems.Except(places);
+
+            schedule.Places.AddRange(addedScheduleItems);
+            schedule.Places.RemoveAll(a => removedScheduleItems.Any(b => b.Id == a.Id));
+
+            await context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
+
+        return NotFound();
+    }
+
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id is null)
+        {
+            return NotFound();
+        }
+
+        var schedule = await context.Schedules
+            .Include(s => s.User)
+            .FirstOrDefaultAsync(m => m.Id == id);
+        return schedule is null ? NotFound() : View(schedule);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var schedule = await context.Schedules.FindAsync(id);
+        if (schedule is not null)
+        {
+            context.Schedules.Remove(schedule);
+            await context.SaveChangesAsync();
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    private bool ScheduleExists(int id) =>
+        context.Schedules.Any(e => e.Id == id);
 }

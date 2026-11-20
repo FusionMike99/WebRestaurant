@@ -1,37 +1,40 @@
-﻿using WebApplicationRestaurant.Models;
 using Microsoft.AspNetCore.Identity;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using WebApplicationRestaurant.Models;
 
-namespace WebApplicationRestaurant
+namespace WebApplicationRestaurant;
+
+public static class UserRoleInitializer
 {
-    public static class UserRoleInitializer
+    public static async Task InitializeAsync(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
     {
-        public static async Task InitializeAsync(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        (string UserName, string Email, string Password, string Role, string Name, string Surname)[] users =
+        [
+            ("adminIS1", "adminIS1@mail.net", "admin", "adminIS", "Админ", "Админов"),
+            ("adminRes1", "adminRes1@mail.net", "admin", "adminRes", "Админ", "Админов"),
+            ("waiter1", "waiter1@mail.net", "waiter", "waiter", "Вайтер", "Вайтеров"),
+            ("cooker1", "cooker1@mail.net", "cooker", "cooker", "Кукер", "Кукеров")
+        ];
+
+        foreach (var (userName, email, password, role, name, surname) in users)
         {
-            //Кортеж состоящий из (имя_пользователя, email, пароль, роль)
-            List<(string, string, string, string)> users = new List<(string, string, string, string)> 
-            { ("adminIS1", "adminIS1@mail.net", "admin", "adminIS"), ("adminRes1", "adminRes1@mail.net", "admin", "adminRes"),
-                ("waiter1", "waiter1@mail.net", "waiter", "waiter"), ("cooker1", "cooker1@mail.net", "cooker", "cooker") };
-
-            List<(string, string)> userNameSurname = new List<(string, string)> { ("Админ", "Админов"), ("Админ", "Админов"),
-                ("Вайтер", "Вайтеров"), ("Кукер", "Кукеров") };
-
-            for (int i = 0; i < users.Count; i++)
+            if (!await roleManager.RoleExistsAsync(role))
             {
-                if (await roleManager.FindByNameAsync(users[i].Item4) == null)
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+
+            if (await userManager.FindByNameAsync(userName) is null)
+            {
+                User user = new()
                 {
-                    await roleManager.CreateAsync(new IdentityRole(users[i].Item4));
-                }
-                if (await userManager.FindByNameAsync(users[i].Item1) == null)
+                    Email = email,
+                    UserName = userName,
+                    Name = name,
+                    Surname = surname
+                };
+                var result = await userManager.CreateAsync(user, password);
+                if (result.Succeeded)
                 {
-                    User user = new User { Email = users[i].Item2, UserName = users[i].Item1,
-                        Name = userNameSurname[i].Item1, Surname = userNameSurname[i].Item2 };
-                    IdentityResult result = await userManager.CreateAsync(user, users[i].Item3);
-                    if (result.Succeeded)
-                    {
-                        await userManager.AddToRoleAsync(user, users[i].Item4);
-                    }
+                    await userManager.AddToRoleAsync(user, role);
                 }
             }
         }
