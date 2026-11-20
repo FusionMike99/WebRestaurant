@@ -4,7 +4,11 @@ This repository vendors curated skills, custom agents, and MCP configuration tai
 
 ## MCP Configuration
 
-- [`.mcp.json`](../.mcp.json): Configures the official **Microsoft Learn MCP Server** (`https://learn.microsoft.com/api/mcp`, Streamable HTTP, no authentication required) exposing `microsoft_docs_search`, `microsoft_docs_fetch`, and `microsoft_code_sample_search`.
+- [`.agents/mcp_config.json`](./mcp_config.json) (Google Antigravity App / CLI / IDE / SDK) and [`.mcp.json`](../.mcp.json) (JetBrains Rider / Air, Claude Code, Cursor): Configure the official **Microsoft Learn MCP Server** (`https://learn.microsoft.com/api/mcp`, Streamable HTTP, no authentication required) exposing `microsoft_docs_search`, `microsoft_docs_fetch`, and `microsoft_code_sample_search`.
+
+## Environment Setup
+
+- [`.agents/environment.json`](./environment.json): Idempotent cloud VM setup command that installs `.NET 11 SDK` (`--channel 11.0`) into `~/.dotnet`, installs `dotnet-ef 11.0.0`, persists `DOTNET_ROOT`/`PATH` in `~/.bashrc`, and runs `dotnet restore WebApplicationRestaurant.sln`.
 
 ## Vendored Skills (`.agents/skills/`)
 
@@ -26,8 +30,15 @@ This repository vendors curated skills, custom agents, and MCP configuration tai
 - `run-tests` (`plugins/dotnet-test/skills/run-tests/`) — Running/filtering `dotnet test` and collecting coverage.
 - `test-anti-patterns` (`plugins/dotnet-test/skills/test-anti-patterns/`) — Auditing test suites for anti-patterns.
 
-## Custom Agents (`.github/agents/`)
+## Custom Agents
 
-### From [`dotnet/skills`](https://github.com/dotnet/skills) (`c227688ed14de4467e3e45f95dc69a94e905e219`, MIT)
+All custom agents are sourced from [`dotnet/skills`](https://github.com/dotnet/skills) (`c227688ed14de4467e3e45f95dc69a94e905e219`, MIT) and provided in both formats:
 
-- [`.github/agents/optimizing-dotnet-performance.agent.md`](../.github/agents/optimizing-dotnet-performance.agent.md) — Two-pass .NET performance architect agent paired with `analyzing-dotnet-performance`.
+- **Google Antigravity (`.agents/agents/*.md`)** — adapted YAML frontmatter (`mainAgent`, `subagent`, `model`, `skills`, no incompatible Copilot `tools:` names):
+  - [`.agents/agents/optimizing-dotnet-performance.md`](./agents/optimizing-dotnet-performance.md)
+  - [`.agents/agents/test-engineer.md`](./agents/test-engineer.md)
+  - [`.agents/agents/msbuild-code-review.md`](./agents/msbuild-code-review.md)
+- **GitHub Copilot / VS Code / IDEs (`.github/agents/*.agent.md`)** — upstream `.agent.md` files:
+  - [`.github/agents/optimizing-dotnet-performance.agent.md`](../.github/agents/optimizing-dotnet-performance.agent.md)
+  - [`.github/agents/test-engineer.agent.md`](../.github/agents/test-engineer.agent.md)
+  - [`.github/agents/msbuild-code-review.agent.md`](../.github/agents/msbuild-code-review.agent.md)
