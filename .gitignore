@@ -447,4 +447,5 @@ fabric.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/rider
 
-.agents
+.agents/*
+!.agents/environment.json
