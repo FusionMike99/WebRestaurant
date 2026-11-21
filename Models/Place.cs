@@ -10,7 +10,7 @@ public class Place
     public int Number { get; set; }
 
     [Display(Name = "Доступність")]
-    public bool Available { get; set; }
+    public bool Available { get; set; } = true;
 
     [Display(Name = "Ім'я того, хто забронював")]
     public string? ReserverName { get; set; }

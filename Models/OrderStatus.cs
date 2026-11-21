@@ -4,6 +4,9 @@ namespace WebApplicationRestaurant.Models;
 
 public class OrderStatus
 {
+    public const int OpenId = 1;
+    public const int ClosedId = 2;
+
     public int Id { get; set; }
 
     [Display(Name = "Назва")]

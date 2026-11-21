@@ -1,10 +1,9 @@
-using System.Data;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Data;
+using WebApplicationRestaurant.Models;
 
 namespace WebApplicationRestaurant.Areas.Waiter.Controllers;
 
@@ -51,23 +50,6 @@ public class ChangingOrderStatusesController(ApplicationContext context) : Contr
             return NotFound();
         }
 
-        SqlParameter paramOrderId = new("@OrderId", id);
-        SqlParameter paramDishStatusId = new("@DishStatusId", 3);
-        SqlParameter paramResult = new()
-        {
-            ParameterName = "@Result",
-            SqlDbType = SqlDbType.Bit,
-            Direction = ParameterDirection.Output
-        };
-        await context.Database.ExecuteSqlRawAsync(
-            "EXEC IsOrderComplete @OrderId, @DishStatusId, @Result OUTPUT",
-            paramOrderId, paramDishStatusId, paramResult);
-        var resultValue = paramResult.Value is bool b && b;
-        if (!resultValue)
-        {
-            ModelState.AddModelError("", "Не приготовлені всі страви");
-        }
-
         var order = await context.Orders
             .Include(o => o.Place)
             .Include(o => o.Status)
@@ -83,11 +65,16 @@ public class ChangingOrderStatusesController(ApplicationContext context) : Contr
             return NotFound();
         }
 
+        if (order.ShoppingCart.Any(sc => sc.DishStatusId != DishStatus.ReadyId))
+        {
+            ModelState.AddModelError("", "Не приготовлені всі страви");
+        }
+
         if (ModelState.IsValid)
         {
             try
             {
-                order.StatusId = 2;
+                order.StatusId = OrderStatus.ClosedId;
                 order.FinishTime = DateTime.Now;
                 context.Update(order);
                 await context.SaveChangesAsync();

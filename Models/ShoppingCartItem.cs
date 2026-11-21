@@ -19,11 +19,11 @@ public partial class ShoppingCartItem
 
     public int DishStatusId { get; set; }
 
-    public string UserId { get; set; } = string.Empty;
+    public string? UserId { get; set; }
 
     [Display(Name = "Статус страви")]
     public DishStatus DishStatus { get; set; } = null!;
 
     [Display(Name = "Кухар")]
-    public User User { get; set; } = null!;
+    public User? User { get; set; }
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Data;
+using WebApplicationRestaurant.Models;
 
 namespace WebApplicationRestaurant.Areas.Administration.Controllers;
 
@@ -46,7 +47,7 @@ public class ChangingOrderIngredientsStatusesController(ApplicationContext conte
             return NotFound();
         }
 
-        order.StatusId = 2;
+        order.StatusId = OrderIngredientsStatus.ClosedId;
 
         if (ModelState.IsValid)
         {
