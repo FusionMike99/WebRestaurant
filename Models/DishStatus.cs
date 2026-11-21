@@ -4,6 +4,10 @@ namespace WebApplicationRestaurant.Models;
 
 public class DishStatus
 {
+    public const int AwaitingId = 1;
+    public const int AcceptedId = 2;
+    public const int ReadyId = 3;
+
     public int Id { get; set; }
 
     [Display(Name = "Назва")]

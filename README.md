@@ -29,7 +29,7 @@ The application separates operational workflows into four role-based MVC areas:
 ## Tech Stack
 
 - **Framework:** ASP.NET Core 11 MVC (`net11.0`, C# 15, nullable reference types enabled)
-- **Data Access:** Entity Framework Core 11.0.0 with Microsoft SQL Server (`ApplicationContext`)
+- **Data Access:** Entity Framework Core 11.0.0 with PostgreSQL (`Npgsql.EntityFrameworkCore.PostgreSQL` 11.0.0, `EFCore.NamingConventions` 11.0.0 `snake_case` schema)
 - **Authentication & Authorization:** ASP.NET Core Identity (`IdentityDbContext<User>`)
 - **Frontend:** Razor Views, Bootstrap 4.6.0 (`libman.json`), jQuery, jQuery Validation, static asset delivery via `MapStaticAssets()`
 - **Session State:** `DistributedMemoryCache` + `ISession` JSON extensions (`System.Text.Json`)
@@ -44,8 +44,8 @@ WebRestaurant/
 │   ├── Cooker/                    # Dish prep status updates and ingredient ordering
 │   └── Waiter/                    # Table booking, customer ordering, order status updates
 ├── Controllers/                   # HomeController (role-based landing), AccountController (login/logout)
-├── Data/                          # ApplicationContext (EF Core Fluent API configuration)
-├── Migrations/                    # EF Core migrations (InitialCreate, Migration2)
+├── Data/                          # ApplicationContext (EF Core Fluent API configuration for PostgreSQL)
+├── Migrations/                    # EF Core PostgreSQL migrations (InitialCreate)
 ├── Models/                        # Domain entities (Dish, Category, Ingredient, MenuPlan, Order, Place, Schedule, User, ...)
 ├── ViewModels/                    # MVC view models
 ├── Views/                         # Shared layouts and root views
@@ -61,34 +61,27 @@ WebRestaurant/
 ### Prerequisites
 
 - [.NET 11 SDK](https://dotnet.microsoft.com/download)
-- Microsoft SQL Server (or SQL Server Express / LocalDB)
+- [PostgreSQL](https://www.postgresql.org/) (15+ recommended)
 
 ### 1. Configure the Database Connection
 
-Update `ConnectionStrings:SqlServerDevelopmentConnection` in `appsettings.json` (or override it via `appsettings.Development.json` / environment variables) to point to your SQL Server instance:
+Update `ConnectionStrings:DefaultConnection` in `appsettings.json` (or override it via `appsettings.Development.json` / user secrets / `ConnectionStrings__DefaultConnection` environment variable) to point to your PostgreSQL instance:
 
 ```json
 {
   "ConnectionStrings": {
-    "SqlServerDevelopmentConnection": "Server=YOUR_SERVER;Database=dbrestaurant;Trusted_Connection=True;TrustServerCertificate=True;"
+    "DefaultConnection": "Host=localhost;Port=5432;Database=dbrestaurant;Username=postgres;Password=postgres"
   }
 }
 ```
 
-> Note: `Microsoft.Data.SqlClient` 7 enables `Encrypt=True` by default. Include `TrustServerCertificate=True;` for local development instances with self-signed certificates.
+### 2. Apply EF Core Migrations
 
-### 2. Apply EF Core Migrations & Stored Procedures
-
-Apply the Entity Framework Core migrations to create the database schema:
+Apply the Entity Framework Core migrations to create the PostgreSQL database and schema:
 
 ```bash
 dotnet ef database update
 ```
-
-Two workflows also rely on SQL Server stored procedures that are not included in the EF Core migrations and must exist in the database:
-
-- `IsExistMenuPlan @StartDate, @EndDate, @Result OUTPUT` — used when creating/validating menu plans in `Areas/RestaurantAdministration/Controllers/MenuPlansController.cs`.
-- `IsOrderComplete @OrderId, @DishStatusId, @Result OUTPUT` — used when checking whether all dishes in an order are ready before closing it in `Areas/Waiter/Controllers/ChangingOrderStatusesController.cs`.
 
 ### 3. Build and Run
 

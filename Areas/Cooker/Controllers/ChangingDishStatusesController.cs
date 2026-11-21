@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Data;
+using WebApplicationRestaurant.Models;
 
 namespace WebApplicationRestaurant.Areas.Cooker.Controllers;
 
@@ -11,7 +12,7 @@ public class ChangingDishStatusesController(ApplicationContext context) : Contro
 {
     public async Task<IActionResult> Index() =>
         View(await context.ShoppingCartItem
-            .Where(sci => sci.DishStatusId != 3)
+            .Where(sci => sci.DishStatusId != DishStatus.ReadyId)
             .Include(sc => sc.Order)
             .Include(sc => sc.Dish)
             .Include(sc => sc.DishStatus)

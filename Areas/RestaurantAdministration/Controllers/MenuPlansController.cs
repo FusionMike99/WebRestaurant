@@ -1,6 +1,4 @@
-using System.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Areas.RestaurantAdministration.ViewModels;
 using WebApplicationRestaurant.Data;
@@ -38,19 +36,10 @@ public class MenuPlansController(ApplicationContext context) : Controller
             ModelState.AddModelError("", "Дата початку не повина бути більшою ніж дата кінця");
         }
 
-        SqlParameter paramStartDate = new("@StartDate", menuPlan.PlanStartDate);
-        SqlParameter paramEndDate = new("@EndDate", menuPlan.PlanEndDate);
-        SqlParameter paramResult = new()
-        {
-            ParameterName = "@Result",
-            SqlDbType = SqlDbType.Bit,
-            Direction = ParameterDirection.Output
-        };
-        await context.Database.ExecuteSqlRawAsync(
-            "EXEC IsExistMenuPlan @StartDate, @EndDate, @Result OUTPUT",
-            paramStartDate, paramEndDate, paramResult);
-        var resultValue = paramResult.Value is bool b && b;
-        if (resultValue)
+        var isOverlapping = await context.MenuPlans.AnyAsync(mp =>
+            mp.PlanStartDate <= menuPlan.PlanEndDate &&
+            mp.PlanEndDate >= menuPlan.PlanStartDate);
+        if (isOverlapping)
         {
             ModelState.AddModelError("", "План меню перетинаєтся з існуючими планами");
         }
