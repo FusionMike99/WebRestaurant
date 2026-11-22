@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Globalization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
@@ -6,14 +5,16 @@ using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
+using WebApplicationRestaurant.Observability;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddRestaurantObservability();
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
         .UseSnakeCaseNamingConvention();
-    options.LogTo(message => Debug.WriteLine(message));
 });
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -36,6 +37,7 @@ var app = builder.Build();
 await using (var scope = app.Services.CreateAsyncScope())
 {
     var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
     try
     {
         var context = services.GetRequiredService<ApplicationContext>();
@@ -43,11 +45,11 @@ await using (var scope = app.Services.CreateAsyncScope())
         var userManager = services.GetRequiredService<UserManager<User>>();
         var rolesManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         await UserRoleInitializer.InitializeAsync(userManager, rolesManager);
+        logger.DatabaseSeedCompleted();
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        logger.DatabaseSeedFailed(ex);
     }
 }
 
@@ -79,6 +81,7 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<TelemetryContextMiddleware>();
 
 app.UseSession();
 

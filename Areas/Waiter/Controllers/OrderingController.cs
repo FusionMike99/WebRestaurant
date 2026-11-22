@@ -5,12 +5,13 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
+using WebApplicationRestaurant.Observability;
 
 namespace WebApplicationRestaurant.Areas.Waiter.Controllers;
 
 [Area("Waiter")]
 [Authorize(Roles = "waiter")]
-public class OrderingController(ApplicationContext context) : Controller
+public class OrderingController(ApplicationContext context, ILogger<OrderingController> logger) : Controller
 {
     private const string CartSessionKey = "shoppingCart";
 
@@ -132,13 +133,25 @@ public class OrderingController(ApplicationContext context) : Controller
         order.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         order.ShoppingCart = HttpContext.Session.Get<List<ShoppingCartItem>>(CartSessionKey) ?? [];
         order.ShoppingCart.ForEach(sc => sc.Dish = null!);
+
+        using var activity = RestaurantTelemetry.ActivitySource.StartActivity("Order.Create");
+        activity?.SetTag("order.place_id", order.PlaceId);
+        activity?.SetTag("order.items_count", order.ShoppingCart.Count);
+
         if (ModelState.IsValid)
         {
             context.Add(order);
             await context.SaveChangesAsync();
+
+            activity?.SetTag("order.id", order.Id);
+            logger.OrderCreated(order.Id, order.PlaceId, order.ShoppingCart.Count, order.UserId);
+            RestaurantTelemetry.OrdersCreated.Add(1);
+            RestaurantTelemetry.OrderItemsCount.Record(order.ShoppingCart.Count);
+
             return RedirectToAction(nameof(Index));
         }
 
+        logger.OrderCreateValidationFailed(order.PlaceId, order.ShoppingCart.Count, order.UserId);
         ViewData["PlaceId"] = new SelectList(context.Places.Where(p => p.Available), "Id", "Number");
         return View("Order", order);
     }

@@ -1,0 +1,12 @@
+services:
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
+    container_name: webrestaurant-aspire-dashboard
+    ports:
+      - "18888:18888" # Web UI
+      - "4317:18889"  # OTLP gRPC ingestion
+      - "4318:18890"  # OTLP HTTP ingestion
+    environment:
+      ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+    restart: unless-stopped

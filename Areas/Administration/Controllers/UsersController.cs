@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Areas.Administration.ViewModels;
 using WebApplicationRestaurant.Models;
+using WebApplicationRestaurant.Observability;
 
 namespace WebApplicationRestaurant.Areas.Administration.Controllers;
 
 [Area("Administration")]
-public class UsersController(UserManager<User> userManager) : Controller
+public class UsersController(UserManager<User> userManager, ILogger<UsersController> logger) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index() => View(await userManager.Users.ToListAsync());
@@ -30,9 +31,12 @@ public class UsersController(UserManager<User> userManager) : Controller
             var result = await userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
+                logger.UserCreated(user.Id, model.Email);
+                RestaurantTelemetry.AdminUserEvents.Add(1, new KeyValuePair<string, object?>("action", "user_created"));
                 return RedirectToAction("Index");
             }
 
+            logger.UserCreateFailed(model.Email, string.Join("; ", result.Errors.Select(e => e.Description)));
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -77,9 +81,12 @@ public class UsersController(UserManager<User> userManager) : Controller
                 var result = await userManager.UpdateAsync(user);
                 if (result.Succeeded)
                 {
+                    logger.UserUpdated(user.Id, model.Email);
+                    RestaurantTelemetry.AdminUserEvents.Add(1, new KeyValuePair<string, object?>("action", "user_updated"));
                     return RedirectToAction("Index");
                 }
 
+                logger.UserUpdateFailed(user.Id, string.Join("; ", result.Errors.Select(e => e.Description)));
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
@@ -96,7 +103,16 @@ public class UsersController(UserManager<User> userManager) : Controller
         var user = await userManager.FindByIdAsync(id);
         if (user is not null)
         {
-            await userManager.DeleteAsync(user);
+            var result = await userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                logger.UserDeleted(user.Id);
+                RestaurantTelemetry.AdminUserEvents.Add(1, new KeyValuePair<string, object?>("action", "user_deleted"));
+            }
+            else
+            {
+                logger.UserDeleteFailed(user.Id, string.Join("; ", result.Errors.Select(e => e.Description)));
+            }
         }
 
         return RedirectToAction("Index");
@@ -130,9 +146,12 @@ public class UsersController(UserManager<User> userManager) : Controller
                 var result = await userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
                 if (result.Succeeded)
                 {
+                    logger.UserPasswordChanged(user.Id);
+                    RestaurantTelemetry.AdminUserEvents.Add(1, new KeyValuePair<string, object?>("action", "password_changed"));
                     return RedirectToAction("Index");
                 }
 
+                logger.UserPasswordChangeFailed(user.Id, string.Join("; ", result.Errors.Select(e => e.Description)));
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);

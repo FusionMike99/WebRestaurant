@@ -3,11 +3,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Areas.Administration.ViewModels;
 using WebApplicationRestaurant.Models;
+using WebApplicationRestaurant.Observability;
 
 namespace WebApplicationRestaurant.Areas.Administration.Controllers;
 
 [Area("Administration")]
-public class RolesController(RoleManager<IdentityRole> roleManager, UserManager<User> userManager) : Controller
+public class RolesController(
+    RoleManager<IdentityRole> roleManager,
+    UserManager<User> userManager,
+    ILogger<RolesController> logger) : Controller
 {
     public async Task<IActionResult> Index() => View(await roleManager.Roles.ToListAsync());
 
@@ -21,9 +25,12 @@ public class RolesController(RoleManager<IdentityRole> roleManager, UserManager<
             var result = await roleManager.CreateAsync(new IdentityRole(name));
             if (result.Succeeded)
             {
+                logger.RoleCreated(name);
+                RestaurantTelemetry.AdminUserEvents.Add(1, new KeyValuePair<string, object?>("action", "role_created"));
                 return RedirectToAction("Index");
             }
 
+            logger.RoleCreateFailed(name, string.Join("; ", result.Errors.Select(e => e.Description)));
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -39,7 +46,12 @@ public class RolesController(RoleManager<IdentityRole> roleManager, UserManager<
         var role = await roleManager.FindByIdAsync(id);
         if (role is not null)
         {
-            await roleManager.DeleteAsync(role);
+            var result = await roleManager.DeleteAsync(role);
+            if (result.Succeeded)
+            {
+                logger.RoleDeleted(role.Id, role.Name ?? string.Empty);
+                RestaurantTelemetry.AdminUserEvents.Add(1, new KeyValuePair<string, object?>("action", "role_deleted"));
+            }
         }
 
         return RedirectToAction("Index");
@@ -75,11 +87,14 @@ public class RolesController(RoleManager<IdentityRole> roleManager, UserManager<
         if (user is not null)
         {
             var userRoles = await userManager.GetRolesAsync(user);
-            var addedRoles = roles.Except(userRoles);
-            var removedRoles = userRoles.Except(roles);
+            var addedRoles = roles.Except(userRoles).ToList();
+            var removedRoles = userRoles.Except(roles).ToList();
 
             await userManager.AddToRolesAsync(user, addedRoles);
             await userManager.RemoveFromRolesAsync(user, removedRoles);
+
+            logger.UserRolesUpdated(user.Id, string.Join(", ", addedRoles), string.Join(", ", removedRoles));
+            RestaurantTelemetry.AdminUserEvents.Add(1, new KeyValuePair<string, object?>("action", "roles_updated"));
 
             return RedirectToAction("Index", "Users");
         }
