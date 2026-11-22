@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
+using WebApplicationRestaurant.Observability;
 
 namespace WebApplicationRestaurant.Areas.Waiter.Controllers;
 
 [Area("Waiter")]
 [Authorize(Roles = "waiter")]
-public class ChangingOrderStatusesController(ApplicationContext context) : Controller
+public class ChangingOrderStatusesController(ApplicationContext context, ILogger<ChangingOrderStatusesController> logger) : Controller
 {
     public async Task<IActionResult> Index()
     {
@@ -50,6 +51,9 @@ public class ChangingOrderStatusesController(ApplicationContext context) : Contr
             return NotFound();
         }
 
+        using var activity = RestaurantTelemetry.ActivitySource.StartActivity("Order.Close");
+        activity?.SetTag("order.id", id.Value);
+
         var order = await context.Orders
             .Include(o => o.Place)
             .Include(o => o.Status)
@@ -62,11 +66,14 @@ public class ChangingOrderStatusesController(ApplicationContext context) : Contr
 
         if (order is null)
         {
+            logger.OrderNotFound(id);
             return NotFound();
         }
 
-        if (order.ShoppingCart.Any(sc => sc.DishStatusId != DishStatus.ReadyId))
+        var unreadyCount = order.ShoppingCart.Count(sc => sc.DishStatusId != DishStatus.ReadyId);
+        if (unreadyCount > 0)
         {
+            logger.OrderCloseRejectedUnreadyDishes(order.Id, unreadyCount);
             ModelState.AddModelError("", "Не приготовлені всі страви");
         }
 
@@ -78,11 +85,15 @@ public class ChangingOrderStatusesController(ApplicationContext context) : Contr
                 order.FinishTime = DateTime.Now;
                 context.Update(order);
                 await context.SaveChangesAsync();
+
+                logger.OrderClosed(order.Id, order.PlaceId);
+                RestaurantTelemetry.OrdersClosed.Add(1);
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!OrderExists(order.Id))
                 {
+                    logger.OrderNotFound(order.Id);
                     return NotFound();
                 }
 

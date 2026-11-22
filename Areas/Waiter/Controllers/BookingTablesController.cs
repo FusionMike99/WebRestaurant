@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
+using WebApplicationRestaurant.Observability;
 
 namespace WebApplicationRestaurant.Areas.Waiter.Controllers;
 
 [Area("Waiter")]
 [Authorize(Roles = "waiter")]
-public class BookingTablesController(ApplicationContext context) : Controller
+public class BookingTablesController(ApplicationContext context, ILogger<BookingTablesController> logger) : Controller
 {
     public async Task<IActionResult> Index() =>
         View(await context.Places.ToListAsync());
@@ -100,6 +101,9 @@ public class BookingTablesController(ApplicationContext context) : Controller
                 place.Available = false;
                 context.Update(place);
                 await context.SaveChangesAsync();
+
+                logger.TableBooked(place.Id, place.Number, place.ReserveTime);
+                RestaurantTelemetry.TableReservations.Add(1, new KeyValuePair<string, object?>("action", "booked"));
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -140,6 +144,9 @@ public class BookingTablesController(ApplicationContext context) : Controller
             {
                 context.Update(place);
                 await context.SaveChangesAsync();
+
+                logger.TableUnbooked(place.Id, place.Number);
+                RestaurantTelemetry.TableReservations.Add(1, new KeyValuePair<string, object?>("action", "unbooked"));
             }
             catch (DbUpdateConcurrencyException)
             {

@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
+using WebApplicationRestaurant.Observability;
 
 namespace WebApplicationRestaurant.Areas.Cooker.Controllers;
 
 [Area("Cooker")]
 [Authorize(Roles = "cooker")]
-public class OrderingIngredientsController(ApplicationContext context) : Controller
+public class OrderingIngredientsController(ApplicationContext context, ILogger<OrderingIngredientsController> logger) : Controller
 {
     private const string CartSessionKey = "ingredientsCart";
 
@@ -128,13 +129,23 @@ public class OrderingIngredientsController(ApplicationContext context) : Control
         order.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         order.OrderIngredientsItems = HttpContext.Session.Get<List<OrderIngredientsItem>>(CartSessionKey) ?? [];
         order.OrderIngredientsItems.ForEach(ic => ic.Ingredient = null!);
+
+        using var activity = RestaurantTelemetry.ActivitySource.StartActivity("IngredientOrder.Create");
+        activity?.SetTag("ingredient_order.items_count", order.OrderIngredientsItems.Count);
+
         if (ModelState.IsValid)
         {
             context.Add(order);
             await context.SaveChangesAsync();
+
+            activity?.SetTag("ingredient_order.id", order.Id);
+            logger.IngredientOrderCreated(order.Id, order.OrderIngredientsItems.Count, order.UserId);
+            RestaurantTelemetry.IngredientOrdersCreated.Add(1);
+
             return RedirectToAction(nameof(Index));
         }
 
+        logger.IngredientOrderCreateValidationFailed(order.OrderIngredientsItems.Count, order.UserId);
         return View("Order", order);
     }
 }

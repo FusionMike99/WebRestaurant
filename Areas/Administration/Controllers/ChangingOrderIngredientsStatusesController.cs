@@ -2,11 +2,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationRestaurant.Data;
 using WebApplicationRestaurant.Models;
+using WebApplicationRestaurant.Observability;
 
 namespace WebApplicationRestaurant.Areas.Administration.Controllers;
 
 [Area("Administration")]
-public class ChangingOrderIngredientsStatusesController(ApplicationContext context) : Controller
+public class ChangingOrderIngredientsStatusesController(
+    ApplicationContext context,
+    ILogger<ChangingOrderIngredientsStatusesController> logger) : Controller
 {
     public async Task<IActionResult> Index()
     {
@@ -44,6 +47,7 @@ public class ChangingOrderIngredientsStatusesController(ApplicationContext conte
         var order = await context.OrderIngredients.FindAsync(id);
         if (order is null)
         {
+            logger.IngredientOrderNotFound(id);
             return NotFound();
         }
 
@@ -55,11 +59,15 @@ public class ChangingOrderIngredientsStatusesController(ApplicationContext conte
             {
                 context.Update(order);
                 await context.SaveChangesAsync();
+
+                logger.IngredientOrderClosed(order.Id);
+                RestaurantTelemetry.IngredientOrdersClosed.Add(1);
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!OrderIngredientsExists(order.Id))
                 {
+                    logger.IngredientOrderNotFound(order.Id);
                     return NotFound();
                 }
 

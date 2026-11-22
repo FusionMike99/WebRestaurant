@@ -33,6 +33,7 @@ The application separates operational workflows into four role-based MVC areas:
 - **Authentication & Authorization:** ASP.NET Core Identity (`IdentityDbContext<User>`)
 - **Frontend:** Razor Views, Bootstrap 4.6.0 (`libman.json`), jQuery, jQuery Validation, static asset delivery via `MapStaticAssets()`
 - **Session State:** `DistributedMemoryCache` + `ISession` JSON extensions (`System.Text.Json`)
+- **Observability:** OpenTelemetry (`OpenTelemetry.Extensions.Hosting`, `Npgsql.OpenTelemetry`, OTLP exporter) for structured logs (`[LoggerMessage]`), distributed traces (`ActivitySource`), and metrics (`Meter`)
 
 ## Project Structure
 
@@ -47,13 +48,15 @@ WebRestaurant/
 ├── Data/                          # ApplicationContext (EF Core Fluent API configuration for PostgreSQL)
 ├── Migrations/                    # EF Core PostgreSQL migrations (InitialCreate)
 ├── Models/                        # Domain entities (Dish, Category, Ingredient, MenuPlan, Order, Place, Schedule, User, ...)
+├── Observability/                 # OpenTelemetry setup, [LoggerMessage] events, ActivitySource/Meter, context middleware
 ├── ViewModels/                    # MVC view models
 ├── Views/                         # Shared layouts and root views
 ├── wwwroot/                       # Static assets (CSS, JS, Bootstrap 4.6, jQuery)
 ├── Program.cs                     # Application startup, DI, Identity, localization, seeding, routing
 ├── SampleData.cs                  # Lookup table seeding (categories, statuses, units)
 ├── UserRoleInitializer.cs         # Default roles and demo user seeding
-└── SessionExtensions.cs           # Typed JSON session helpers
+├── SessionExtensions.cs           # Typed JSON session helpers
+└── docker-compose.telemetry.yml   # Optional standalone .NET Aspire Dashboard for local OTLP inspection
 ```
 
 ## Getting Started
@@ -62,6 +65,7 @@ WebRestaurant/
 
 - [.NET 11 SDK](https://dotnet.microsoft.com/download)
 - [PostgreSQL](https://www.postgresql.org/) (15+ recommended)
+- [Docker](https://www.docker.com/) (optional, for the local `.NET Aspire Dashboard` telemetry viewer)
 
 ### 1. Configure the Database Connection
 
@@ -97,6 +101,32 @@ By default, the application listens on:
 - HTTP: `http://localhost:5000`
 
 On startup, `SampleData.Initialize` and `UserRoleInitializer.InitializeAsync` automatically seed lookup tables, roles, and default accounts if they do not already exist.
+
+## Observability (OpenTelemetry)
+
+The application uses **OpenTelemetry** (`WebApplicationRestaurant.Observability`) across all three telemetry signals:
+
+- **Structured Logs:** `Microsoft.Extensions.Logging` with source-generated `[LoggerMessage]` events (`LogEvents`), `SimpleConsole` in `Development`, `JsonConsole` in `Production`, and OpenTelemetry log bridge (`IncludeFormattedMessage`, `IncludeScopes`). Every request enriches `Activity.Current` and `ILogger` scopes with authenticated user metadata (`UserId`, `UserName`, `UserRoles`) and MVC route info (`Area`, `Controller`, `Action`) via `TelemetryContextMiddleware`.
+- **Distributed Traces:** Automatic ASP.NET Core, `HttpClient`, and `Npgsql` (PostgreSQL) spans plus custom business spans (`Order.Create`, `Order.Close`, `IngredientOrder.Create`).
+- **Metrics:** ASP.NET Core, `HttpClient`, `.NET Runtime`, `Npgsql`, and custom restaurant counters/histograms (`restaurant.auth.logins`, `restaurant.orders.created`, `restaurant.orders.items_count`, `restaurant.orders.closed`, `restaurant.dishes.status_changes`, `restaurant.tables.reservations`, `restaurant.ingredient_orders.created`, `restaurant.ingredient_orders.closed`, `restaurant.admin.user_events`).
+
+### Viewing Telemetry Locally with .NET Aspire Dashboard
+
+OTLP export is **opt-in**: if no endpoint is configured, the app logs to the console without attempting background OTLP connections.
+
+1. Start the standalone Aspire Dashboard:
+
+   ```bash
+   docker compose -f docker-compose.telemetry.yml up -d
+   ```
+
+2. Run the application with OTLP export enabled (via environment variable or `OpenTelemetry:OtlpEndpoint` in `appsettings.Development.json`):
+
+   ```bash
+   OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 dotnet run
+   ```
+
+3. Open the Aspire Dashboard UI at `http://localhost:18888` to inspect **Structured Logs**, **Traces**, and **Metrics**.
 
 ## Default Seeded Accounts
 
